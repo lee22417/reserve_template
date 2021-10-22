@@ -37,6 +37,31 @@ $ npm run test:cov
 ## Docker
 
 ```bash
-# Run docker - MySQL, Redis
+# Run docker - app, MySQL, Redis
 $ docker-compose -f docker-compose.yaml up -d
+
+# Stop docker
+$ docker-compose -f docker-compose.yaml down
+
+# Show docker containers
+$ docker ps
+
+# Show docker container information
+$ docker inspect {container id}
+```
+
+## MySQL Container
+
+```bash
+# Login MySQL
+$ mysql -u {username} -p
+
+# Login as Root
+$ mysql -u root -p
+
+# Select DB
+> use {database}
+
+# Allow
+> FLUSH PRIVILEGES
 ```

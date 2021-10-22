@@ -4,20 +4,38 @@ networks:
   app-tier:
     driver: bridge
 services:
+  app:
+    networks:
+      - app-tier
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules # Remove this if you have pure JS
+    restart: always
+    ports:
+      - '3000:3000'
+    links:
+      - mysql
+    depends_on:
+      - mysql
   mysql:
     networks:
       - app-tier
     platform: linux/x86_64
     container_name: reserve_db
     restart: always
-    image: mysql
+    image: mysql/mysql-server:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
     ports:
-      - '3308:3306'
+      - '3306:3306'
+    expose:
+      - '3306'
   redis: # Example Service
     networks:
       - app-tier
