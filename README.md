@@ -1,6 +1,12 @@
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Reservation App REST API
+
+## Env
+
+- Nest, Docker, MySQL, Typescript
+- TypeORM, JWT
+- MacOS (M1)
 
 ## Installation
 
@@ -65,3 +71,8 @@ $ mysql -u root -p
 # Allow
 > FLUSH PRIVILEGES
 ```
+
+## Reference
+
+- JWT
+  https://docs.nestjs.com/security/authentication#implementing-passport-jwt
