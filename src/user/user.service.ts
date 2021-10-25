@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -9,19 +9,24 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private UserRepository: Repository<User>,
+    private userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const isExist = await this.userRepository.findOne({ id: createUserDto.id });
+    if (isExist) {
+      throw new ForbiddenException({ status: HttpStatus.FORBIDDEN, msg: 'Already existed id' });
+    }
+    const { password, ...result } = await this.userRepository.save(createUserDto);
+    return result;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return await this.userRepository.find({ select: ['id', 'name'] });
   }
 
   async findOne(id: string): Promise<User> {
-    return await this.UserRepository.findOne({ id: id });
+    return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -33,7 +38,7 @@ export class UserService {
   }
 
   async getHashPw(password: string): Promise<string> {
-    const hashPassword = await this.UserRepository.query(
+    const hashPassword = await this.userRepository.query(
       `SELECT PASSWORD('` + password + `') as password`,
     );
     console.log(hashPassword);

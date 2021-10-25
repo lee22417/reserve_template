@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -8,7 +9,7 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'user' })
-export class User {
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   no: number;
 
@@ -28,4 +29,11 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  static async createAndSave(id: string, name: string, password: string) {
+    const user = new User();
+    user.id = id;
+    user.name = name;
+    user.password = password;
+  }
 }
