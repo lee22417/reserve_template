@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { FormatService } from './common/format/format.service';
+import { ReservationModule } from './reservation/reservation.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { FormatService } from './common/format/format.service';
     }),
     AuthModule,
     UserModule,
+    ReservationModule,
   ],
   controllers: [AppController],
   providers: [AppService, FormatService],
