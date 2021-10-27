@@ -1,9 +1,11 @@
+import { Reservation } from './reservation.entity';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -29,6 +31,9 @@ export class User extends BaseEntity {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => Reservation, (reservation) => reservation.user)
+  reservations: Reservation[];
 
   static async createAndSave(id: string, name: string, password: string) {
     const user = new User();
