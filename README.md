@@ -4,9 +4,9 @@
 
 ## Env
 
-- Nest, Docker, MySQL, Typescript, Git
+- NestJs, Docker, MySQL, Typescript, Git
 - TypeORM, JWT, esLint, Prettier
-- MacOS (M1), Postman, Github
+- MacOS (M1), VS code, Postman, SourceTree, Github
 
 ## Installation
 
