@@ -15,15 +15,15 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   no: number;
 
-  @Column('varchar', { length: 20, unique: true })
-  @Index('it_id')
+  @Column('varchar', { length: 20, unique: true, comment: '회원 ID' })
+  @Index('id')
   id: string;
 
-  @Column('varchar', { length: 100 })
-  @Index('dt_id')
+  @Column('varchar', { length: 100, comment: '회원 이름' })
+  @Index('name')
   name: string;
 
-  @Column('varchar', { length: 255 })
+  @Column('varchar', { length: 255, comment: '회원 비밀번호' })
   password: string;
 
   @CreateDateColumn()

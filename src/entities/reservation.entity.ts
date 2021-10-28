@@ -5,15 +5,27 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Payment } from './payment.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'reservation' })
 export class Reservation extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   no: number;
+
+  @Column('datetime', { comment: '예약 일자 및 시간' })
+  @Index('reserved_at')
+  reserved_at: Date;
+
+  @Column('int', { comment: '예약 인원 수' })
+  num_of_people: number;
+
+  @Column('int', { comment: '예약 가격' })
+  price: number;
 
   @CreateDateColumn()
   created_at: Date;
@@ -23,4 +35,7 @@ export class Reservation extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.reservations)
   user: User;
+
+  @OneToMany(() => Payment, (payment) => payment.reservation)
+  payments: Payment[];
 }
