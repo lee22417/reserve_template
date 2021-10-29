@@ -6,13 +6,13 @@ import { UserService } from '../user/user.service';
 export class AuthService {
   constructor(private userService: UserService, private jwtService: JwtService) {}
 
-  async validateUser(id: string, pass: string): Promise<any> {
+  async validateUser(id: string, password: string): Promise<any> {
     const user = await this.userService.findOne(id);
-    const hashedPW = await this.userService.getHashPw(pass);
-    if (user && user.password === hashedPW) {
+    const isMatched = await this.userService.matchPassword(id, password);
+    if (user && isMatched) {
       return user;
     }
-    return null;
+    return false;
   }
 
   async login(user: any) {

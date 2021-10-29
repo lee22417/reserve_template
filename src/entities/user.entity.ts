@@ -41,4 +41,8 @@ export class User extends BaseEntity {
     user.name = name;
     user.password = password;
   }
+
+  static async findById(id: string) {
+    return this.findOne({ id: id });
+  }
 }
