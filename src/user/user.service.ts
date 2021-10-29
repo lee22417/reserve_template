@@ -4,6 +4,7 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -17,6 +18,8 @@ export class UserService {
     if (isExist) {
       throw new ForbiddenException({ status: HttpStatus.FORBIDDEN, msg: 'Already existed id' });
     }
+    // password hashing
+    createUserDto.password = await this.hashingPassword(createUserDto.password);
     const { password, ...result } = await this.userRepository.save(createUserDto);
     return result;
   }
@@ -37,11 +40,9 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
-  async getHashPw(password: string): Promise<string> {
-    const hashPassword = await this.userRepository.query(
-      `SELECT PASSWORD('` + password + `') as password`,
-    );
-    console.log(hashPassword);
-    return hashPassword[0]['password'];
+  async hashingPassword(password: string) {
+    const saltOrRounds = 10;
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    return hash;
   }
 }
