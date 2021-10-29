@@ -40,16 +40,6 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
-  async matchPassword(id: string, password: string): Promise<boolean> {
-    const user = await User.findById(id);
-    console.log(user);
-    if (user) {
-      return await bcrypt.compare(password, user.password);
-    } else {
-      return false;
-    }
-  }
-
   async hashingPassword(password: string) {
     const saltOrRounds = 10;
     const hash = await bcrypt.hash(password, saltOrRounds);
