@@ -9,4 +9,10 @@ export class CreateUserDto {
 
   @IsString()
   password: string;
+
+  @IsString()
+  phone_number: string;
+
+  @IsString()
+  email: string;
 }
