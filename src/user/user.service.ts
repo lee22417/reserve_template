@@ -32,12 +32,14 @@ export class UserService {
     return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    //TODO jwt token check
+    return await this.userRepository.update(id, updateUserDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    //TODO jwt token check
+    return await this.userRepository.delete(id);
   }
 
   async hashingPassword(password: string) {

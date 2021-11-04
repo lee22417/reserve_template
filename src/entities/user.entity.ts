@@ -26,6 +26,12 @@ export class User extends BaseEntity {
   @Column('varchar', { length: 255, comment: '회원 비밀번호' })
   password: string;
 
+  @Column('varchar', { length: 20, comment: '전화 번호' })
+  phone_number: string;
+
+  @Column('varchar', { length: 100, comment: '이메일' })
+  email: string;
+
   @CreateDateColumn()
   created_at: Date;
 
