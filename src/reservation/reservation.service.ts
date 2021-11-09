@@ -9,8 +9,9 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 export class ReservationService {
   constructor(@InjectRepository(Reservation) private rRepository: Repository<Reservation>) {}
 
-  create(createReservationDto: CreateReservationDto) {
-    return 'This action adds a new reservation';
+  async create(createReservationDto: CreateReservationDto) {
+    const result = await this.rRepository.save(createReservationDto);
+    return result;
   }
 
   async findAll() {
@@ -19,7 +20,7 @@ export class ReservationService {
 
   // find by pk
   async findOne(no: number) {
-    return await this.rsvRepository.findOne({ no: no });
+    return await this.rRepository.findOne({ no: no });
   }
 
   //TODO find by user id, reservation date
