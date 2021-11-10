@@ -32,9 +32,9 @@ export class UserService {
     return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(no: string, updateUserDto: UpdateUserDto) {
     //TODO jwt token check
-    return await this.userRepository.update(id, updateUserDto);
+    return await this.userRepository.update(no, updateUserDto);
   }
 
   async remove(id: number) {
