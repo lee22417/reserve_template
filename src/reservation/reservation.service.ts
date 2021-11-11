@@ -16,6 +16,7 @@ export class ReservationService {
 
   async create(userId: string, createReservationDto: CreateReservationDto) {
     const reservation = await this.rRepository.save(createReservationDto);
+    // connect reservation to user
     reservation.user = await this.userRepository.findOne({ id: userId });
     await reservation.save();
     return reservation;
@@ -36,7 +37,7 @@ export class ReservationService {
     return await this.rRepository.update(no, updateReservationDto);
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} reservation`;
-  // }
+  async remove(no: number) {
+    return await this.rRepository.delete(no);
+  }
 }
