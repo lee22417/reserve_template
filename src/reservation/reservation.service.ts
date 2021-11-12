@@ -23,15 +23,22 @@ export class ReservationService {
   }
 
   async findAll() {
-    return await this.rRepository.find();
+    return await this.rRepository.find({ relations: ['user', 'payments'] });
   }
 
   // find by pk
   async findOne(no: number) {
-    return await this.rRepository.findOne({ no: no });
+    return await this.rRepository.findOne({ where: { no: no }, relations: ['user', 'payments'] });
   }
 
-  //TODO find by user id, reservation date
+  // find by user id
+  async findByUserId(userId: number) {
+    return await this.rRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user', 'payments'],
+    });
+  }
+  //TODO reservation date
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
     return await this.rRepository.update(no, updateReservationDto);
