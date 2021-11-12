@@ -16,27 +16,35 @@ export class ReservationService {
 
   async create(userId: string, createReservationDto: CreateReservationDto) {
     const reservation = await this.rRepository.save(createReservationDto);
+    // connect reservation to user
     reservation.user = await this.userRepository.findOne({ id: userId });
     await reservation.save();
     return reservation;
   }
 
   async findAll() {
-    return await this.rRepository.find();
+    return await this.rRepository.find({ relations: ['user', 'payments'] });
   }
 
   // find by pk
   async findOne(no: number) {
-    return await this.rRepository.findOne({ no: no });
+    return await this.rRepository.findOne({ where: { no: no }, relations: ['user', 'payments'] });
   }
 
-  //TODO find by user id, reservation date
+  // find by user id
+  async findByUserId(userId: number) {
+    return await this.rRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user', 'payments'],
+    });
+  }
+  //TODO reservation date
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
     return await this.rRepository.update(no, updateReservationDto);
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} reservation`;
-  // }
+  async remove(no: number) {
+    return await this.rRepository.delete(no);
+  }
 }
