@@ -29,6 +29,6 @@ export class ReservationController {
 
   @Delete(':no')
   remove(@Param('no') no: string) {
-    return this.reservationService.remove(+no);
+    return this.reservationService.cancel(+no);
   }
 }

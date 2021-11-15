@@ -37,9 +37,12 @@ export class UserService {
     return await this.userRepository.update(no, updateUserDto);
   }
 
-  async remove(id: number) {
+  async quit(id: string) {
     //TODO jwt token check
-    return await this.userRepository.delete(id);
+    const user = await this.findOne(id);
+    user.is_quit = true;
+    user.save();
+    return true;
   }
 
   async hashingPassword(password: string) {

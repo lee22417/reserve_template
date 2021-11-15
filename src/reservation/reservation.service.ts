@@ -44,7 +44,10 @@ export class ReservationService {
     return await this.rRepository.update(no, updateReservationDto);
   }
 
-  async remove(no: number) {
-    return await this.rRepository.delete(no);
+  async cancel(no: number) {
+    const user = await this.findOne(no);
+    user.is_canceled = true;
+    user.save();
+    return true;
   }
 }
