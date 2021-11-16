@@ -41,7 +41,7 @@ export class UserService {
     //TODO jwt token check
     const user = await this.findOne(id);
     user.is_quit = true;
-    user.save();
+    this.userRepository.save(user);
     return true;
   }
 

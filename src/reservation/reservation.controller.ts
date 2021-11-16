@@ -7,8 +7,8 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
-  @Post()
-  create(@Query() userId: string, @Body() createReservationDto: CreateReservationDto) {
+  @Post(':userId')
+  create(@Param('userId') userId: string, @Body() createReservationDto: CreateReservationDto) {
     return this.reservationService.create(userId, createReservationDto);
   }
 

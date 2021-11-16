@@ -18,7 +18,7 @@ export class ReservationService {
     const reservation = await this.rRepository.save(createReservationDto);
     // connect reservation to user
     reservation.user = await this.userRepository.findOne({ id: userId });
-    await reservation.save();
+    this.rRepository.save(reservation);
     return reservation;
   }
 
@@ -38,6 +38,7 @@ export class ReservationService {
       relations: ['user', 'payments'],
     });
   }
+
   //TODO reservation date
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
@@ -47,7 +48,7 @@ export class ReservationService {
   async cancel(no: number) {
     const user = await this.findOne(no);
     user.is_canceled = true;
-    user.save();
+    this.userRepository.save(user);
     return true;
   }
 }
