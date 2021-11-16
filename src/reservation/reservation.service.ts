@@ -23,19 +23,26 @@ export class ReservationService {
   }
 
   async findAll() {
-    return await this.rRepository.find({ relations: ['user', 'payments'] });
+    return await this.rRepository.find({
+      select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
+      // relations: ['payments'],
+    });
   }
 
   // find by pk
   async findOne(no: number) {
-    return await this.rRepository.findOne({ where: { no: no }, relations: ['user', 'payments'] });
+    return await this.rRepository.findOne({
+      where: { no: no },
+      select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
+      // relations: ['payments'],
+    });
   }
 
   // find by user id
   async findByUserId(userId: number) {
     return await this.rRepository.find({
       where: { user: { id: userId } },
-      relations: ['user', 'payments'],
+      // relations: ['user', 'payments'],
     });
   }
 
