@@ -25,20 +25,23 @@ export class UserService {
   }
 
   async findAll() {
+    //TODO jwt token check - admin
     return await this.userRepository.find({ select: ['id', 'name'] });
   }
 
   async findOne(id: string): Promise<User> {
+    //TODO jwt token check - admin or user
     return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
   }
 
   async update(no: string, updateUserDto: UpdateUserDto) {
-    //TODO jwt token check
+    //TODO jwt token check - admin or user
+    //TODO prevent update is_quit
     return await this.userRepository.update(no, updateUserDto);
   }
 
   async quit(id: string) {
-    //TODO jwt token check
+    //TODO jwt token check - admin or user
     const user = await this.findOne(id);
     user.is_quit = true;
     this.userRepository.save(user);

@@ -15,6 +15,7 @@ export class ReservationService {
   ) {}
 
   async create(userId: string, createReservationDto: CreateReservationDto) {
+    //TODO jwt token check - admin or user
     const reservation = await this.rRepository.save(createReservationDto);
     // connect reservation to user
     reservation.user = await this.userRepository.findOne({ id: userId });
@@ -23,6 +24,8 @@ export class ReservationService {
   }
 
   async findAll() {
+    //TODO jwt token check - admin
+    //TODO user - only select - 'reserved_at','is_canceled'
     return await this.rRepository.find({
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
       // relations: ['payments'],
@@ -31,6 +34,7 @@ export class ReservationService {
 
   // find by pk
   async findOne(no: number) {
+    //TODO jwt token check - admin
     return await this.rRepository.findOne({
       where: { no: no },
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
@@ -40,6 +44,7 @@ export class ReservationService {
 
   // find by user id
   async findByUserId(userId: number) {
+    //TODO jwt token check - admin or user
     return await this.rRepository.find({
       where: { user: { id: userId } },
       // relations: ['user', 'payments'],
@@ -49,13 +54,16 @@ export class ReservationService {
   //TODO reservation date
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
+    //TODO jwt token check - admin or user
+    //TODO prevent update is_canceled
     return await this.rRepository.update(no, updateReservationDto);
   }
 
   async cancel(no: number) {
-    const user = await this.findOne(no);
-    user.is_canceled = true;
-    this.userRepository.save(user);
-    return true;
+    //TODO jwt token check - admin or user
+    const reservation = await this.findOne(no);
+    reservation.is_canceled = true;
+    await this.rRepository.save(reservation);
+    return reservation;
   }
 }
