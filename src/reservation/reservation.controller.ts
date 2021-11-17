@@ -8,7 +8,7 @@ export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
   @Post()
-  create(@Query() userId: string, @Body() createReservationDto: CreateReservationDto) {
+  create(@Query('userId') userId: string, @Body() createReservationDto: CreateReservationDto) {
     return this.reservationService.create(userId, createReservationDto);
   }
 
@@ -29,6 +29,6 @@ export class ReservationController {
 
   @Delete(':no')
   remove(@Param('no') no: string) {
-    return this.reservationService.remove(+no);
+    return this.reservationService.cancel(+no);
   }
 }

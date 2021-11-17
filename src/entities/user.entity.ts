@@ -32,6 +32,12 @@ export class User extends BaseEntity {
   @Column('varchar', { length: 100, comment: '이메일' })
   email: string;
 
+  @Column('boolean', { default: false, comment: '탈퇴여부' })
+  is_quit: boolean;
+
+  @Column('boolean', { default: false, comment: '관리자 여부' })
+  is_admin: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 

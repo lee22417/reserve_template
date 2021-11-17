@@ -27,6 +27,9 @@ export class Reservation extends BaseEntity {
   @Column('int', { comment: '예약 가격' })
   price: number;
 
+  @Column('boolean', { comment: '취소여부', default: false })
+  is_canceled: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
