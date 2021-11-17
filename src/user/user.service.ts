@@ -36,7 +36,6 @@ export class UserService {
 
   async update(no: string, updateUserDto: UpdateUserDto) {
     //TODO jwt token check - admin or user
-    //TODO prevent update is_quit
     return await this.userRepository.update(no, updateUserDto);
   }
 

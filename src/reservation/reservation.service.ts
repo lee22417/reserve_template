@@ -23,13 +23,20 @@ export class ReservationService {
     return reservation;
   }
 
-  async findAll() {
+  async findAll(is_admin: boolean = null) {
     //TODO jwt token check - admin
-    //TODO user - only select - 'reserved_at','is_canceled'
-    return await this.rRepository.find({
-      select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
-      // relations: ['payments'],
-    });
+    if (is_admin == true) {
+      // admin
+      return await this.rRepository.find({
+        select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
+        // relations: ['payments'],
+      });
+    } else {
+      // public
+      return await this.rRepository.find({
+        select: ['no', 'reserved_at', 'is_canceled'],
+      });
+    }
   }
 
   // find by pk
@@ -55,7 +62,6 @@ export class ReservationService {
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
     //TODO jwt token check - admin or user
-    //TODO prevent update is_canceled
     return await this.rRepository.update(no, updateReservationDto);
   }
 
