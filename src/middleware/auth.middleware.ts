@@ -10,7 +10,8 @@ export class AuthMiddleware implements NestMiddleware {
     if (token) {
       // const payload = [];
       // console.log(payload);
-      // res.locals.payload = payload;
+      // req.app.locals['payload'] = resData.data.payload;
+      // req.body.payload = resData.data.payload;
     }
     next();
   }
