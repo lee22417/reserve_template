@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,7 +13,9 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Req() req) {
+    const payload = req.app.locals.payload ? req.app.locals.payload : null;
+    console.log(payload);
     return this.userService.findAll();
   }
 

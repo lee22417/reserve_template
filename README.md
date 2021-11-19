@@ -1,12 +1,12 @@
-## Description
+## reserve_template
 
 - Reservation App REST API
 
 ## Env
 
-- Nest, Docker, MySQL, Typescript, Git
+- NestJs, Docker, MySQL, Typescript, Git
 - TypeORM, JWT, esLint, Prettier
-- MacOS (M1), Postman, Github
+- MacOS (M1), VS code, Postman, SourceTree, Github
 
 ## Installation
 
@@ -25,19 +25,6 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
 ## Docker
