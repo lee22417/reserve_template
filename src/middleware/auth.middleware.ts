@@ -1,18 +1,20 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     console.log('Middleware');
-    const token = req.header('authorization');
+    let token = req.header('authorization');
 
-    if (token) {
-      // const payload = [];
-      // console.log(payload);
-      // req.app.locals['payload'] = resData.data.payload;
-      // req.body.payload = resData.data.payload;
+    if (!token) {
+      throw new HttpException('No token provided', HttpStatus.UNAUTHORIZED);
     }
+    const bearerToken: string[] = token.split(' ');
+    if (bearerToken.length == 2) {
+      token = bearerToken[1];
+    }
+    req.app.locals.token = token;
     next();
   }
 }

@@ -29,8 +29,7 @@ export class AuthService {
 
   async decodeToken(token) {
     try {
-      const bearerToken: string = token.split(' ')[1];
-      const payload = await this.jwtService.verifyAsync(bearerToken);
+      const payload = await this.jwtService.verifyAsync(token);
       console.log(payload);
       return payload;
     } catch (err) {

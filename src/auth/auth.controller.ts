@@ -1,4 +1,14 @@
-import { Controller, Post, Request, UseGuards, Body, Res, Get, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  Body,
+  Res,
+  Get,
+  Req,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
 import { AuthService } from './auth.service';
@@ -12,12 +22,23 @@ export class AuthController {
     const user = await this.authService.validateUser(verifyAuthDto);
     if (user) {
       return {
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         msg: 'Success',
         token: await this.authService.login(verifyAuthDto),
       };
     } else {
-      return { statusCode: 400, msg: 'Unauthorized' };
+      return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
+    }
+  }
+
+  @Post('/decode')
+  async decodeToken(@Req() req) {
+    const token = req.app.locals.token;
+    const payload = await this.authService.decodeToken(token);
+    if (payload) {
+      return { statusCode: HttpStatus.OK, msg: 'Success', data: payload };
+    } else {
+      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'Invalid signature' };
     }
   }
 }
