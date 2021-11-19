@@ -9,7 +9,6 @@ import { LocalStrategy } from './local.strategy';
 
 @Module({
   imports: [
-    UserModule,
     PassportModule,
     JwtModule.register({
       secret: 'test',

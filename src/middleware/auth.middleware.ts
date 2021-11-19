@@ -1,9 +1,11 @@
 import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
+  constructor(private readonly authService: AuthService) {}
+  async use(req: Request, res: Response, next: NextFunction) {
     console.log('Middleware');
     let token = req.header('authorization');
 
@@ -14,7 +16,10 @@ export class AuthMiddleware implements NestMiddleware {
     if (bearerToken.length == 2) {
       token = bearerToken[1];
     }
-    req.app.locals.token = token;
+
+    const payload = await this.authService.decodeToken(token);
+    req.app.locals.payload = payload;
+    console.log(req.app.locals);
     next();
   }
 }
