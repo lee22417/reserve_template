@@ -13,11 +13,11 @@ export class AuthController {
     if (user) {
       return {
         statusCode: 200,
-        msg: 'success',
+        msg: 'Success',
         token: await this.authService.login(verifyAuthDto),
       };
     } else {
-      return { statusCode: 401, msg: 'login fail' };
+      return { statusCode: 400, msg: 'Unauthorized' };
     }
   }
 }

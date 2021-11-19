@@ -26,4 +26,16 @@ export class AuthService {
       expiresIn: '3600',
     };
   }
+
+  async decodeToken(token) {
+    try {
+      const bearerToken: string = token.split(' ')[1];
+      const payload = await this.jwtService.verifyAsync(bearerToken);
+      console.log(payload);
+      return payload;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  }
 }
