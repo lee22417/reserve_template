@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { CommonAuth } from 'src/common/common.auth';
 
 @Injectable()
 export class UserService {
@@ -14,33 +15,43 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const isExist = await this.userRepository.findOne({ id: createUserDto.id });
-    if (isExist) {
-      throw new ForbiddenException({ status: HttpStatus.FORBIDDEN, msg: 'Already existed id' });
+    const sameId = await this.userRepository.findOne({ id: createUserDto.id });
+    if (sameId && !sameId.is_quit) {
+      // signed in id, not leaved
+      throw new ForbiddenException({ status: HttpStatus.BAD_REQUEST, msg: 'Already existed id' });
+    }
+    if (sameId && sameId.is_quit) {
+      // signed in , but leaved before
+      // delete old account
+      await this.userRepository
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where('id = :id', { id: sameId.id });
     }
     // password hashing
     createUserDto.password = await this.hashingPassword(createUserDto.password);
+    // create id
     const { password, ...result } = await this.userRepository.save(createUserDto);
     return result;
   }
 
   async findAll() {
-    //TODO jwt token check - admin
     return await this.userRepository.find({ select: ['id', 'name'] });
   }
 
   async findOne(id: string): Promise<User> {
-    //TODO jwt token check - admin or user
-    return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
+    return await this.userRepository.findOne({
+      where: { id: id, is_quit: false },
+      select: ['id', 'name'],
+    });
   }
 
   async update(no: string, updateUserDto: UpdateUserDto) {
-    //TODO jwt token check - admin or user
     return await this.userRepository.update(no, updateUserDto);
   }
 
   async quit(id: string) {
-    //TODO jwt token check - admin or user
     const user = await this.findOne(id);
     user.is_quit = true;
     this.userRepository.save(user);

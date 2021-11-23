@@ -6,9 +6,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { FormatService } from './common/format/format.service';
+import { CommonFormat } from './common/common.format';
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthMiddleware } from './middleware/auth.middleware';
+import { CommonAuth } from './common/common.auth';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { AuthMiddleware } from './middleware/auth.middleware';
     ReservationModule,
   ],
   controllers: [AppController],
-  providers: [AppService, FormatService],
+  providers: [AppService, CommonFormat, CommonAuth],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
