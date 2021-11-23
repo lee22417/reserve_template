@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { CommonAuth } from 'src/common/common.auth';
 
 @Injectable()
 export class UserService {
@@ -25,22 +26,18 @@ export class UserService {
   }
 
   async findAll() {
-    //TODO jwt token check - admin
     return await this.userRepository.find({ select: ['id', 'name'] });
   }
 
   async findOne(id: string): Promise<User> {
-    //TODO jwt token check - admin or user
     return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
   }
 
   async update(no: string, updateUserDto: UpdateUserDto) {
-    //TODO jwt token check - admin or user
     return await this.userRepository.update(no, updateUserDto);
   }
 
   async quit(id: string) {
-    //TODO jwt token check - admin or user
     const user = await this.findOne(id);
     user.is_quit = true;
     this.userRepository.save(user);
