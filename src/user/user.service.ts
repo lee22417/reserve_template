@@ -15,12 +15,23 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const isExist = await this.userRepository.findOne({ id: createUserDto.id });
-    if (isExist) {
-      throw new ForbiddenException({ status: HttpStatus.FORBIDDEN, msg: 'Already existed id' });
+    const sameId = await this.userRepository.findOne({ id: createUserDto.id });
+    if (sameId && !sameId.is_quit) {
+      // signed in id, not leaved
+      throw new ForbiddenException({ status: HttpStatus.BAD_REQUEST, msg: 'Already existed id' });
+    }
+    if (sameId && sameId.is_quit) {
+      // signed in , but leaved before
+      // delete old account
+      await this.userRepository
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where('id = :id', { id: sameId.id });
     }
     // password hashing
     createUserDto.password = await this.hashingPassword(createUserDto.password);
+    // create id
     const { password, ...result } = await this.userRepository.save(createUserDto);
     return result;
   }
