@@ -30,7 +30,10 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<User> {
-    return await this.userRepository.findOne({ id: id }, { select: ['id', 'name'] });
+    return await this.userRepository.findOne({
+      where: { id: id, is_quit: false },
+      select: ['id', 'name'],
+    });
   }
 
   async update(no: string, updateUserDto: UpdateUserDto) {

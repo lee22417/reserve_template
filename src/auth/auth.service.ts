@@ -12,7 +12,7 @@ export class AuthService {
   // authorize user
   async validateUser(verifyAuthDto: VerifyAuthDto): Promise<any> {
     const user = await User.findById(verifyAuthDto.id);
-    if (user) {
+    if (user && !user.is_quit) {
       const isMatched = await bcrypt.compare(verifyAuthDto.password, user.password);
       if (isMatched) return user;
     }
@@ -20,7 +20,7 @@ export class AuthService {
   }
 
   // login - get JWT token
-  async login(user: any) {
+  async getToken(user: any) {
     const payload = { id: user.id, is_admin: user.is_admin };
     const accessToken = await this.jwtService.sign(payload);
     return {

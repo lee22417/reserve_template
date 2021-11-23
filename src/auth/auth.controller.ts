@@ -24,7 +24,7 @@ export class AuthController {
       return {
         statusCode: HttpStatus.OK,
         msg: 'Success',
-        token: await this.authService.login(verifyAuthDto),
+        token: await this.authService.getToken(verifyAuthDto),
       };
     } else {
       return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
