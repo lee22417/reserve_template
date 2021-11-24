@@ -19,9 +19,8 @@ export class UserController {
     // only admin can access
     if (isAdmin) {
       return { statusCode: HttpStatus.OK, msg: 'Success', data: this.userService.findAll() };
-    } else {
-      return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
     }
+    return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
   }
 
   @Get(':id')

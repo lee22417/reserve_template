@@ -15,7 +15,6 @@ export class ReservationService {
   ) {}
 
   async create(userId: string, createReservationDto: CreateReservationDto) {
-    //TODO jwt token check - admin or user
     const reservation = await this.rRepository.save(createReservationDto);
     // connect reservation to user
     reservation.user = await this.userRepository.findOne({ id: userId });
@@ -23,9 +22,8 @@ export class ReservationService {
     return reservation;
   }
 
-  async findAll(is_admin: boolean = null) {
-    //TODO jwt token check - admin
-    if (is_admin == true) {
+  async findAll(isAdmin: boolean = false) {
+    if (isAdmin == true) {
       // admin
       return await this.rRepository.find({
         select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
