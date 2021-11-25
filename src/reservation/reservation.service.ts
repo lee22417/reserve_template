@@ -27,7 +27,7 @@ export class ReservationService {
       // admin
       return await this.rRepository.find({
         select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
-        // relations: ['payments'],
+        relations: ['payments'],
       });
     } else {
       // public
@@ -39,7 +39,6 @@ export class ReservationService {
 
   // find by pk
   async findOne(no: number) {
-    //TODO jwt token check - admin
     return await this.rRepository.findOne({
       where: { no: no },
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
@@ -48,18 +47,16 @@ export class ReservationService {
   }
 
   // find by user id
-  async findByUserId(userId: number) {
-    //TODO jwt token check - admin or user
+  async findByUserId(userId: string) {
     return await this.rRepository.find({
       where: { user: { id: userId } },
-      // relations: ['user', 'payments'],
+      relations: ['payments'],
     });
   }
 
   //TODO reservation date
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
-    //TODO jwt token check - admin or user
     return await this.rRepository.update(no, updateReservationDto);
   }
 
