@@ -14,6 +14,7 @@ import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { CommonAuth } from 'src/common/common.auth';
+import { type } from 'os';
 
 @Controller('reservation')
 export class ReservationController {
@@ -36,18 +37,22 @@ export class ReservationController {
   }
 
   @Get()
-  findAll(@Req() req) {
-    const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
-    // user can access limited information
-    return this.reservationService.findAll(isAdmin);
-  }
-
-  @Get('/user/:userId')
-  findByUser(@Param('userId') userId: string, @Req() req) {
-    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userId);
-    if (isAllowed) {
-      // admin or userself can see information
-      return this.reservationService.findByUserId(userId);
+  findAll(@Req() req, @Query('user') user: string, @Query('date') date) {
+    // search option : date | userId
+    if (date) {
+      return this.reservationService.findByDate(date);
+    } else if (user) {
+      const isAllowed = true; //this.commonAuth.isAdminOrUserself(req.app.locals.payload, user);
+      if (isAllowed) {
+        // admin or userself can see information
+        return this.reservationService.findByUserId(user);
+      }
+    } else {
+      const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
+      // only admin can see all reservation
+      if (isAdmin) {
+        return this.reservationService.findAll(isAdmin);
+      }
     }
     return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
   }
@@ -55,8 +60,8 @@ export class ReservationController {
   @Get(':no')
   findOne(@Param('no') no: string, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
-    // only admin can search reservation information
     if (isAdmin) {
+      // only admin can search reservation information
       return this.reservationService.findOne(+no);
     }
     return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };

@@ -42,26 +42,32 @@ export class ReservationService {
     return await this.rRepository.findOne({
       where: { no: no },
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
-      // relations: ['payments'],
+      relations: ['user', 'payments'],
     });
   }
 
   // find by user id
   async findByUserId(userId: string) {
+    //TODO hide user information
     return await this.rRepository.find({
       where: { user: { id: userId } },
-      relations: ['payments'],
+      relations: ['user', 'payments'],
     });
   }
 
-  //TODO reservation date
+  // reservation date
+  async findByDate(date) {
+    return await this.rRepository.find({
+      where: { reserved_at: date },
+      select: ['no', 'reserved_at', 'is_canceled'],
+    });
+  }
 
   async update(no: number, updateReservationDto: UpdateReservationDto) {
     return await this.rRepository.update(no, updateReservationDto);
   }
 
   async cancel(no: number) {
-    //TODO jwt token check - admin or user
     const reservation = await this.findOne(no);
     reservation.is_canceled = true;
     await this.rRepository.save(reservation);
