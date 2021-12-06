@@ -14,7 +14,10 @@ export class AuthService {
     const user = await User.findById(verifyAuthDto.id);
     if (user && !user.is_quit) {
       const isMatched = await bcrypt.compare(verifyAuthDto.password, user.password);
-      if (isMatched) return user;
+      if (isMatched) {
+        delete user.password;
+        return user;
+      }
     }
     return null;
   }

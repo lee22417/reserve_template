@@ -6,7 +6,7 @@ import { AuthService } from 'src/auth/auth.service';
 export class AuthMiddleware implements NestMiddleware {
   constructor(private readonly authService: AuthService) {}
   async use(req: Request, res: Response, next: NextFunction) {
-    let token = req.header('authorization');
+    let token = req.header('Authorization');
 
     if (!token) {
       throw new HttpException('No token provided', HttpStatus.UNAUTHORIZED);
@@ -18,7 +18,6 @@ export class AuthMiddleware implements NestMiddleware {
 
     const payload = await this.authService.decodeToken(token);
     req.app.locals.payload = payload;
-    console.log(req.app.locals);
     next();
   }
 }
