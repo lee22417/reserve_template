@@ -48,13 +48,17 @@ export class UserService {
   }
 
   async update(no: string, updateUserDto: UpdateUserDto) {
-    return await this.userRepository.update(no, updateUserDto);
+    if (!updateUserDto.id) {
+      return await this.userRepository.update(no, updateUserDto);
+    } else {
+      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'id는 업데이트 할 수 없습니다.' };
+    }
   }
 
   async quit(id: string) {
     const user = await this.findOne(id);
     user.is_quit = true;
-    this.userRepository.save(user);
+    await this.userRepository.save(user);
     return true;
   }
 
