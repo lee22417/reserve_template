@@ -42,7 +42,7 @@ export class ReservationController {
     if (date) {
       return this.reservationService.findByDate(date);
     } else if (user) {
-      const isAllowed = true; //this.commonAuth.isAdminOrUserself(req.app.locals.payload, user);
+      const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, user);
       if (isAllowed) {
         // admin or userself can see information
         return this.reservationService.findByUserId(user);

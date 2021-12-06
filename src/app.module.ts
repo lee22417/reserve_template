@@ -10,6 +10,7 @@ import { CommonFormat } from './common/common.format';
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { CommonAuth } from './common/common.auth';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CommonAuth } from './common/common.auth';
     AuthModule,
     UserModule,
     ReservationModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService, CommonFormat, CommonAuth],
