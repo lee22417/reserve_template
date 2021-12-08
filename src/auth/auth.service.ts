@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -37,9 +37,9 @@ export class AuthService {
     try {
       const payload = await this.jwtService.verifyAsync(token);
       return payload;
-    } catch (err) {
-      console.log(err);
-      return false;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(e.message, HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -52,8 +52,9 @@ export class AuthService {
       } else {
         return false;
       }
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 }
