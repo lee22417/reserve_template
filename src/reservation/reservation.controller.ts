@@ -49,10 +49,7 @@ export class ReservationController {
       }
     } else {
       const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
-      // only admin can see all reservation
-      if (isAdmin) {
-        return this.reservationService.findAll(isAdmin);
-      }
+      return this.reservationService.findAll(isAdmin);
     }
     return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
   }

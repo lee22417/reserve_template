@@ -18,7 +18,8 @@ export class ReservationService {
     const reservation = await this.rRepository.save(createReservationDto);
     // connect reservation to user
     reservation.user = await this.userRepository.findOne({ id: userId });
-    this.rRepository.save(reservation);
+    await this.rRepository.save(reservation);
+    delete reservation.user;
     return reservation;
   }
 
@@ -32,7 +33,7 @@ export class ReservationService {
     } else {
       // public
       return await this.rRepository.find({
-        select: ['no', 'reserved_at', 'is_canceled'],
+        select: ['reserved_at', 'is_canceled'],
       });
     }
   }
@@ -48,11 +49,15 @@ export class ReservationService {
 
   // find by user id
   async findByUserId(userId: string) {
-    //TODO hide user information
-    return await this.rRepository.find({
+    const reservations = await this.rRepository.find({
       where: { user: { id: userId } },
       relations: ['user', 'payments'],
     });
+    reservations.forEach((row) => {
+      // delete user information
+      delete row.user;
+    });
+    return reservations;
   }
 
   // reservation date
