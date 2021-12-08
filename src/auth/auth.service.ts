@@ -39,7 +39,7 @@ export class AuthService {
       return payload;
     } catch (e) {
       console.log(e);
-      throw new HttpException(e.message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(e.name + ': ' + e.message, HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -54,7 +54,7 @@ export class AuthService {
       }
     } catch (e) {
       console.log(e);
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(e.name + ': ' + e.message, HttpStatus.UNAUTHORIZED);
     }
   }
 }
