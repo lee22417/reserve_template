@@ -55,7 +55,6 @@ export class UserController {
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req) {
     const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, id);
-    console.log(isAllowed);
     if (isAllowed) {
       return await this.userService.quit(id);
     }

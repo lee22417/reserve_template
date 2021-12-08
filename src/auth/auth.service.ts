@@ -36,7 +36,6 @@ export class AuthService {
   async decodeToken(token) {
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      console.log(payload);
       return payload;
     } catch (err) {
       console.log(err);

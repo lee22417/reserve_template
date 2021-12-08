@@ -8,16 +8,18 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     let token = req.header('Authorization');
 
-    if (!token) {
-      throw new HttpException('No token provided', HttpStatus.UNAUTHORIZED);
-    }
-    const bearerToken: string[] = token.split(' ');
-    if (bearerToken.length == 2) {
-      token = bearerToken[1];
-    }
+    // if (!token) {
+    //   throw new HttpException('No token provided', HttpStatus.UNAUTHORIZED);
+    // }
+    if (token) {
+      const bearerToken: string[] = token.split(' ');
+      if (bearerToken.length == 2) {
+        token = bearerToken[1];
+      }
 
-    const payload = await this.authService.decodeToken(token);
-    req.app.locals.payload = payload;
+      const payload = await this.authService.decodeToken(token);
+      req.app.locals.payload = payload;
+    }
     next();
   }
 }
