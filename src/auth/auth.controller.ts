@@ -8,6 +8,7 @@ import {
   Get,
   Req,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
@@ -23,11 +24,11 @@ export class AuthController {
     if (user) {
       return {
         statusCode: HttpStatus.OK,
-        msg: 'Success',
+        message: 'Success',
         token: await this.authService.getToken(user),
       };
     } else {
-      return { statusCode: HttpStatus.UNAUTHORIZED, msg: 'Unauthorized' };
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -36,9 +37,9 @@ export class AuthController {
     const token = req.app.locals.token;
     const payload = await this.authService.decodeToken(token);
     if (payload) {
-      return { statusCode: HttpStatus.OK, msg: 'Success', data: payload };
+      return { statusCode: HttpStatus.OK, message: 'Success', data: payload };
     } else {
-      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'Invalid signature' };
+      throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
     }
   }
 }

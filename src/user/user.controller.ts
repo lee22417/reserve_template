@@ -29,7 +29,11 @@ export class UserController {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     // only admin can access
     if (isAdmin) {
-      return { statusCode: HttpStatus.OK, msg: 'Success', data: await this.userService.findAll() };
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Success',
+        data: await this.userService.findAll(),
+      };
     }
     throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
   }

@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -18,11 +18,11 @@ export class UserService {
     const sameId = await this.userRepository.findOne({ id: createUserDto.id });
     if (sameId && !sameId.is_quit) {
       // joined id, not quit
-      throw new ForbiddenException({ status: HttpStatus.BAD_REQUEST, msg: 'Already existed id' });
+      throw new HttpException('Already existed id', HttpStatus.BAD_REQUEST);
     }
     if (sameId && sameId.is_quit) {
       // joined id, quit, can not use id currently
-      throw new ForbiddenException({ status: HttpStatus.BAD_REQUEST, msg: 'Already existed id' });
+      throw new HttpException('Already existed id', HttpStatus.BAD_REQUEST);
       // delete old account
       // await this.userRepository
       //   .createQueryBuilder()
@@ -53,10 +53,7 @@ export class UserService {
     if (!updateUserDto.id) {
       return await this.userRepository.update(no, updateUserDto);
     } else {
-      throw new ForbiddenException({
-        status: HttpStatus.BAD_REQUEST,
-        msg: 'Id can not be updated',
-      });
+      throw new HttpException('Id can not be updated', HttpStatus.BAD_REQUEST);
     }
   }
 
