@@ -29,7 +29,7 @@ export class User extends BaseEntity {
   @Column('varchar', { length: 20, comment: '전화 번호' })
   phone_number: string;
 
-  @Column('varchar', { length: 100, comment: '이메일' })
+  @Column('varchar', { length: 100, unique: true, comment: '이메일' })
   email: string;
 
   @Column('boolean', { default: false, comment: '탈퇴여부' })

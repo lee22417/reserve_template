@@ -37,7 +37,7 @@ export class UserService {
   }
 
   async findAll() {
-    return await this.userRepository.find({ select: ['id', 'name'] });
+    return await this.userRepository.find({ select: ['id', 'name'], where: { is_quit: false } });
   }
 
   async findOne(id: string): Promise<User> {
@@ -51,14 +51,20 @@ export class UserService {
     if (!updateUserDto.id) {
       return await this.userRepository.update(no, updateUserDto);
     } else {
-      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'id는 업데이트 할 수 없습니다.' };
+      throw new ForbiddenException({
+        status: HttpStatus.BAD_REQUEST,
+        msg: 'Id can not be updated',
+      });
     }
   }
 
   async quit(id: string) {
-    const user = await this.findOne(id);
-    user.is_quit = true;
-    await this.userRepository.save(user);
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ is_quit: true })
+      .where('id = :id', { id: id })
+      .execute();
     return true;
   }
 
