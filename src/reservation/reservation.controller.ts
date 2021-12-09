@@ -16,6 +16,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { CommonAuth } from 'src/common/common.auth';
 import { type } from 'os';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Controller('reservation')
 export class ReservationController {
@@ -34,7 +35,7 @@ export class ReservationController {
     if (isAllowed) {
       return this.reservationService.create(userId, createReservationDto);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Get()
@@ -52,7 +53,7 @@ export class ReservationController {
       const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
       return this.reservationService.findAll(isAdmin);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Get(':no')
@@ -62,7 +63,7 @@ export class ReservationController {
       // only admin can search reservation information
       return this.reservationService.findOne(+no);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Patch(':no')
@@ -72,7 +73,7 @@ export class ReservationController {
       // only admin can update reservation information
       return this.reservationService.update(+no, updateReservationDto);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Delete(':no')
@@ -82,6 +83,6 @@ export class ReservationController {
       // only admin can cancel reservation
       return this.reservationService.cancel(+no);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 }

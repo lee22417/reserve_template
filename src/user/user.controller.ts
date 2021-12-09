@@ -14,6 +14,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CommonAuth } from 'src/common/common.auth';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Controller('user')
 export class UserController {
@@ -35,7 +36,7 @@ export class UserController {
         data: await this.userService.findAll(),
       };
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Get(':id')
@@ -44,7 +45,7 @@ export class UserController {
     if (isAllowed) {
       return await this.userService.findOne(id);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Patch(':id')
@@ -53,7 +54,7 @@ export class UserController {
     if (isAllowed) {
       return await this.userService.update(id, updateUserDto);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 
   @Delete(':id')
@@ -62,6 +63,6 @@ export class UserController {
     if (isAllowed) {
       return await this.userService.quit(id);
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException();
   }
 }

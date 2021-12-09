@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,10 @@ export class AuthService {
       return payload;
     } catch (e) {
       console.log(e);
-      throw new HttpException(e.name + ': ' + e.message, HttpStatus.UNAUTHORIZED);
+      throw new UnauthorizedException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: e.name + ': ' + e.message,
+      });
     }
   }
 
@@ -54,7 +58,10 @@ export class AuthService {
       }
     } catch (e) {
       console.log(e);
-      throw new HttpException(e.name + ': ' + e.message, HttpStatus.UNAUTHORIZED);
+      throw new UnauthorizedException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: e.name + ': ' + e.message,
+      });
     }
   }
 }

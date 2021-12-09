@@ -9,10 +9,12 @@ import {
   Req,
   HttpStatus,
   HttpException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
 import { AuthService } from './auth.service';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +30,7 @@ export class AuthController {
         token: await this.authService.getToken(user),
       };
     } else {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throw new UnauthorizedException();
     }
   }
 
@@ -39,7 +41,10 @@ export class AuthController {
     if (payload) {
       return { statusCode: HttpStatus.OK, message: 'Success', data: payload };
     } else {
-      throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Invalid signature',
+      });
     }
   }
 }
