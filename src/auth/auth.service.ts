@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -12,15 +13,18 @@ export class AuthService {
   // authorize user
   async validateUser(verifyAuthDto: VerifyAuthDto): Promise<any> {
     const user = await User.findById(verifyAuthDto.id);
-    if (user) {
+    if (user && !user.is_quit) {
       const isMatched = await bcrypt.compare(verifyAuthDto.password, user.password);
-      if (isMatched) return user;
+      if (isMatched) {
+        delete user.password;
+        return user;
+      }
     }
     return null;
   }
 
   // login - get JWT token
-  async login(user: any) {
+  async getToken(user: any) {
     const payload = { id: user.id, is_admin: user.is_admin };
     const accessToken = await this.jwtService.sign(payload);
     return {
@@ -33,11 +37,13 @@ export class AuthService {
   async decodeToken(token) {
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      console.log(payload);
       return payload;
-    } catch (err) {
-      console.log(err);
-      return false;
+    } catch (e) {
+      console.log(e);
+      throw new UnauthorizedException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: e.name + ': ' + e.message,
+      });
     }
   }
 
@@ -50,8 +56,12 @@ export class AuthService {
       } else {
         return false;
       }
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      console.log(e);
+      throw new UnauthorizedException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: e.name + ': ' + e.message,
+      });
     }
   }
 }

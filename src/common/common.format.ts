@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class FormatService {
+export class CommonFormat {
   // php addslashes
   addslashes(str: string): string {
     return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');

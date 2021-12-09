@@ -4,10 +4,11 @@ import { ReservationController } from './reservation.controller';
 import { Reservation } from 'src/entities/reservation.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
+import { CommonAuth } from 'src/common/common.auth';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Reservation, User])],
-  providers: [ReservationService],
+  providers: [ReservationService, CommonAuth],
   controllers: [ReservationController],
   exports: [ReservationService],
 })
