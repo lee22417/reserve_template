@@ -15,12 +15,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
 import { AuthService } from './auth.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('인증 API')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
+  @ApiOperation({ summary: '로그인 API' })
   async login(@Body() verifyAuthDto: VerifyAuthDto, @Res({ passthrough: true }) response) {
     const user = await this.authService.validateUser(verifyAuthDto);
     if (user) {
@@ -35,6 +38,8 @@ export class AuthController {
   }
 
   @Post('/decode')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: '토큰해석 API' })
   async decodeToken(@Req() req) {
     const token = req.app.locals.token;
     const payload = await this.authService.decodeToken(token);

@@ -17,8 +17,10 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { CommonAuth } from 'src/common/common.auth';
 import { type } from 'os';
 import { UnauthorizedException } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('reservation')
+@ApiTags('예약정보 API')
 export class ReservationController {
   constructor(
     private readonly reservationService: ReservationService,
@@ -26,6 +28,7 @@ export class ReservationController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: '예약생성 API' })
   create(
     @Query('userId') userId: string,
     @Body() createReservationDto: CreateReservationDto,
@@ -39,6 +42,19 @@ export class ReservationController {
   }
 
   @Get()
+  @ApiOperation({ summary: '예약리스트 API' })
+  @ApiQuery({
+    name: 'date',
+    description: '해당 날짜로 예약정보 확인 (토큰 X)',
+    type: 'string',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'user',
+    description: '해당 회원 ID로 예약정보 확인 (토큰 확인), 관리자의 경우 모든 예약정보 확인 가능',
+    type: 'string',
+    required: false,
+  })
   findAll(@Req() req, @Query('user') user: string, @Query('date') date) {
     // search option : date | userId
     if (date) {
@@ -57,6 +73,8 @@ export class ReservationController {
   }
 
   @Get(':no')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: '예약리스트 API', description: '관리자가 해당 예약리스트 확인' })
   findOne(@Param('no') no: string, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
@@ -67,6 +85,8 @@ export class ReservationController {
   }
 
   @Patch(':no')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: '예약 업데이트 API', description: '관리자가 해당 예약 업데이트 확인' })
   update(@Param('no') no: string, @Body() updateReservationDto: UpdateReservationDto, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
@@ -77,6 +97,8 @@ export class ReservationController {
   }
 
   @Delete(':no')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: '예약 취소 API', description: '관리자가 해당 예약 취소 확인' })
   remove(@Param('no') no: string, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
