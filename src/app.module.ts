@@ -11,6 +11,7 @@ import { ReservationModule } from './api/reservation/reservation.module';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { CommonAuth } from './common/common.auth';
 import { PaymentModule } from './api/payment/payment.module';
+import { Swagger } from './common/swagger/swagger';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { PaymentModule } from './api/payment/payment.module';
     PaymentModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CommonFormat, CommonAuth],
+  providers: [AppService, CommonFormat, CommonAuth, Swagger],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
