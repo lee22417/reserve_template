@@ -41,4 +41,8 @@ export class Reservation extends BaseEntity {
 
   @OneToMany(() => Payment, (payment) => payment.reservation)
   payments: Payment[];
+
+  static async findByNo(no: number) {
+    return this.findOne({ no: no });
+  }
 }

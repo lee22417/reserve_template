@@ -1,16 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  Req,
-  HttpStatus,
-  HttpException,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -26,20 +14,6 @@ export class ReservationController {
     private readonly reservationService: ReservationService,
     private readonly commonAuth: CommonAuth,
   ) {}
-
-  @Post()
-  @ApiOperation({ summary: '예약생성 API' })
-  create(
-    @Query('userId') userId: string,
-    @Body() createReservationDto: CreateReservationDto,
-    @Req() req,
-  ) {
-    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userId);
-    if (isAllowed) {
-      return this.reservationService.create(userId, createReservationDto);
-    }
-    throw new UnauthorizedException();
-  }
 
   @Get()
   @ApiOperation({ summary: '예약리스트 API' })
@@ -68,6 +42,25 @@ export class ReservationController {
     } else {
       const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
       return this.reservationService.findAll(isAdmin);
+    }
+    throw new UnauthorizedException();
+  }
+
+  @Post(':user_id')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: '예약생성 API',
+    description:
+      '해당 id의 예약생성 (해당 id와 토큰 id 확인), 관리자의 경우 모든 예약 정보 생성 가능',
+  })
+  create(
+    @Param('user_id') userId: string,
+    @Body() createReservationDto: CreateReservationDto,
+    @Req() req,
+  ) {
+    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userId);
+    if (isAllowed) {
+      return this.reservationService.create(userId, createReservationDto);
     }
     throw new UnauthorizedException();
   }
