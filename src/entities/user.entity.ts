@@ -55,6 +55,15 @@ export class User extends BaseEntity {
   }
 
   static async findById(id: string) {
-    return this.findOne({ id: id });
+    return await this.findOne({ id: id });
+  }
+
+  static async findByReservationNo(reservation_no: number) {
+    return await this.findOne({
+      where: {
+        reservations: { no: reservation_no },
+      },
+      relations: ['reservations'],
+    });
   }
 }

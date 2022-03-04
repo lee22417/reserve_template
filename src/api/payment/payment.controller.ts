@@ -13,9 +13,10 @@ import {
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommonAuth } from 'src/common/common.auth';
 import { Reservation } from 'src/entities/reservation.entity';
+import { User } from 'src/entities/user.entity';
 
 @Controller('payment')
 @ApiTags('결제정보 API')
@@ -25,45 +26,36 @@ export class PaymentController {
     private readonly commonAuth: CommonAuth,
   ) {}
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
-  }
-
   @Post(':reservation_no')
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: '결제내역 생성 API',
     description:
       '해당 id의 결제내역 생성 (해당 id와 토큰 id 확인), 관리자의 경우 모든 결제내역 생성 가능',
   })
   async create(
-    @Param('reservation_no') reservationNo,
+    @Param('reservation_no') reservationNo: number,
     @Body() createPaymentDto: CreatePaymentDto,
     @Req() req,
   ) {
-    const reservation = await Reservation.findByNo(reservationNo);
-    const isAllowed = this.commonAuth.isAdminOrUserself(
-      req.app.locals.payload,
-      reservation.user.id,
-    );
+    const user = await User.findByReservationNo(reservationNo);
+    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, user.id);
     if (isAllowed) {
       return await this.paymentService.create(reservationNo, createPaymentDto);
     }
     throw new UnauthorizedException();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
+  @Patch(':no')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: '결제내역 업데이트 API',
+    description: '해당 id의 결제내역 업데이트, 관리자만 결제내역 업데이트 가능',
+  })
+  async update(@Param('no') no: number, @Body() updatePaymentDto: UpdatePaymentDto, @Req() req) {
+    const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
+    if (isAdmin) {
+      // return this.paymentService.update(+id, updatePaymentDto);
+    }
   }
 }

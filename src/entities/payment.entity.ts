@@ -25,11 +25,10 @@ export class Payment extends BaseEntity {
   @Column('varchar', { length: 100, comment: '결제 카드사/은행명' })
   bank: string;
 
-  @Column('boolean', { comment: '취소 여부' })
-  @Index('is_canceled')
-  is_canceled: boolean;
+  @Column('boolean', { default: false, comment: '환불 여부' })
+  is_refund: boolean;
 
-  @Column('boolean', { comment: '결제 성공 여부' })
+  @Column('boolean', { default: false, comment: '결제 성공 여부' })
   is_succeeded: boolean;
 
   @CreateDateColumn()
@@ -38,6 +37,13 @@ export class Payment extends BaseEntity {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column('varchar', { length: 255, default: '', comment: '로그' })
+  log: string;
+
   @ManyToOne(() => Reservation, (reservation) => reservation.payments)
   reservation: Reservation;
+
+  static async findByNo(no: number) {
+    return this.findOne({ no: no });
+  }
 }
