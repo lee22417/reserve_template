@@ -65,7 +65,7 @@ export class UserController {
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Req() req) {
     const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, id);
     if (isAllowed) {
-      return await this.userService.update(id, updateUserDto);
+      return await this.userService.update(id, updateUserDto, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();
   }
@@ -80,7 +80,7 @@ export class UserController {
   async remove(@Param('id') id: string, @Req() req) {
     const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, id);
     if (isAllowed) {
-      return await this.userService.quit(id);
+      return await this.userService.quit(id, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();
   }

@@ -13,6 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { CommonAuth } from 'src/common/common.auth';
 import { UserLog } from 'src/entities/userLog.entity';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -66,30 +67,65 @@ export class UserService {
   }
 
   // update user information
-  async update(no: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto, chargeId: string) {
     if (!updateUserDto.id) {
-      return await this.userRepository.update(no, updateUserDto);
+      try {
+        // convert dto to plain
+        const updateRows = classToPlain(updateUserDto);
+        // save update history
+        const user = await User.findById(id);
+        let isLogCreated = false;
+        Object.keys(updateRows).map(async (key) => {
+          const log = await UserLog.createAndSave(key, user[key], updateRows[key], chargeId, user);
+          isLogCreated = log ? true : false;
+        });
+        // update user information
+        await User.updateById(id, updateRows);
+        return { statusCode: HttpStatus.OK, msg: 'Updated' };
+      } catch (e) {
+        console.log(e.message);
+        console.log(e.body);
+        return { statusCode: e.code, msg: e.body };
+      }
     } else {
-      throw new BadRequestException({
+      return {
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Id can not be updated',
-      });
+      };
     }
   }
 
   // update user as quit
-  async quit(id: string) {
-    await this.userRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ is_quit: true })
-      .where('id = :id', { id: id })
-      .execute();
-    return true;
+  async quit(id: string, chargeId) {
+    try {
+      const user = await User.findById(id);
+      const log = await UserLog.createAndSave(
+        'is_quit',
+        user.is_quit ? 'true' : 'false',
+        'true',
+        chargeId,
+        user,
+      );
+      if (log) {
+        await this.userRepository
+          .createQueryBuilder()
+          .update(User)
+          .set({ is_quit: true })
+          .where('id = :id', { id: id })
+          .execute();
+        return { statusCode: HttpStatus.OK, msg: 'Success' };
+      } else {
+        return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, msg: 'Error occurs' };
+      }
+    } catch (e) {
+      console.log(e.message);
+      console.log(e.body);
+      return { statusCode: e.code, msg: e.body };
+    }
   }
 
   // update user authority as admin
-  async grantAdmin(id: string, giverId: string) {
+  async grantAdmin(id: string, chargeId: string) {
     try {
       // save who give authority
       const user = await User.findById(id);
@@ -97,7 +133,7 @@ export class UserService {
         'is_admin',
         user.is_admin ? 'true' : 'false',
         'true',
-        giverId,
+        chargeId,
         user,
       );
       if (log) {

@@ -70,4 +70,10 @@ export class User extends BaseEntity {
       relations: ['reservations'],
     });
   }
+
+  static async updateById(id: string, rows) {
+    const user = await this.findById(id);
+    Object.keys(rows).map((key) => (user[key] = rows[key]));
+    return await user.save();
+  }
 }

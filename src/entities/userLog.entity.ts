@@ -29,7 +29,7 @@ export class UserLog extends BaseEntity {
   created_at: Date;
 
   @ManyToOne(() => User, (user) => user.reservations)
-  target: User;
+  target: User; // 해당하는 회원
 
   static async createAndSave(
     column: string,
