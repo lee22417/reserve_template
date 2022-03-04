@@ -84,4 +84,18 @@ export class UserController {
     }
     throw new UnauthorizedException();
   }
+
+  @Patch('/admin/:id')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: '회원 관리자 권한 부여 API',
+    description: '해당 id의 관리자 권한 부여, 관리자만 가능',
+  })
+  async grantAdmin(@Param('id') id: string, @Req() req) {
+    const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
+    if (isAdmin) {
+      return await this.userService.grantAdmin(id, req.app.locals.payload.id);
+    }
+    throw new UnauthorizedException();
+  }
 }

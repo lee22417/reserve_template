@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserLog } from './userLog.entity';
 
 @Entity({ name: 'user' })
 export class User extends BaseEntity {
@@ -46,6 +47,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   reservations: Reservation[];
+
+  @OneToMany(() => UserLog, (log) => log.target)
+  logs: UserLog[];
 
   static async createAndSave(id: string, name: string, password: string) {
     const user = new User();
