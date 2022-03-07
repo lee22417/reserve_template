@@ -14,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { CommonAuth } from 'src/common/common.auth';
 import { UserLog } from 'src/entities/userLog.entity';
 import { classToPlain } from 'class-transformer';
+import CONFIG from 'src/config/common.config';
 
 @Injectable()
 export class UserService {
@@ -112,7 +113,7 @@ export class UserService {
       if (user && user.is_quit) {
         const log = await UserLog.createAndSave(
           'is_quit',
-          user.is_quit ? 'true' : 'false',
+          user.is_quit ? CONFIG.LOG.true : CONFIG.LOG.false,
           'true',
           chargeId,
           user,
@@ -143,7 +144,7 @@ export class UserService {
       if (user) {
         const log = await UserLog.createAndSave(
           'is_admin',
-          user.is_admin ? 'true' : 'false',
+          user.is_admin ? CONFIG.LOG.true : CONFIG.LOG.false,
           'true',
           chargeId,
           user,

@@ -8,6 +8,7 @@ import { User } from 'src/entities/user.entity';
 import { ReservationLog } from 'src/entities/reservationLog.entity';
 import { CommonFormat } from 'src/common/common.format';
 import { classToPlain } from 'class-transformer';
+import CONFIG from 'src/config/common.config';
 
 @Injectable()
 export class ReservationService {
@@ -130,7 +131,7 @@ export class ReservationService {
       // create log in reservation log
       await ReservationLog.createAndSave(
         'is_canceled',
-        reservation.is_canceled ? 'true' : 'false',
+        reservation.is_canceled ? CONFIG.LOG.true : CONFIG.LOG.false,
         'true',
         chargeId,
         reservation,
