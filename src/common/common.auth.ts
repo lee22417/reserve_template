@@ -10,10 +10,10 @@ export class CommonAuth {
     }
   }
 
-  isAdminOrUserself(payload: any = null, requestId: string) {
+  isAdminOrUserself(payload: any = null, requestNo: number) {
     if (payload) {
       // admin or user `my information`
-      if (payload.is_admin || (!payload.is_admin && requestId === payload.id)) {
+      if (payload.is_admin || (!payload.is_admin && requestNo === payload.no)) {
         return true;
       }
     }

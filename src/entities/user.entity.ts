@@ -58,6 +58,10 @@ export class User extends BaseEntity {
     user.password = password;
   }
 
+  static async findByNo(no: number) {
+    return await this.findOne({ no: no });
+  }
+
   static async findById(id: string) {
     return await this.findOne({ id: id });
   }

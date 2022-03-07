@@ -25,11 +25,11 @@ export class ReservationController {
   })
   @ApiQuery({
     name: 'user',
-    description: '해당 회원 ID로 예약정보 확인 (토큰 확인), 관리자의 경우 모든 예약정보 확인 가능',
+    description: '해당 회원 No로 예약정보 확인 (토큰 확인), 관리자의 경우 모든 예약정보 확인 가능',
     type: 'string',
     required: false,
   })
-  findAll(@Req() req, @Query('user') user: string, @Query('date') date) {
+  findAll(@Req() req, @Query('user') user: number, @Query('date') date) {
     // search option : date | userId
     if (date) {
       return this.reservationService.findByDate(date);
@@ -37,7 +37,7 @@ export class ReservationController {
       const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, user);
       if (isAllowed) {
         // admin or userself can see information
-        return this.reservationService.findByUserId(user);
+        return this.reservationService.findByUserNo(user);
       }
     } else {
       const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
@@ -46,7 +46,7 @@ export class ReservationController {
     throw new UnauthorizedException();
   }
 
-  @Post(':user_id')
+  @Post(':user_no')
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: '예약생성 API',
@@ -54,13 +54,13 @@ export class ReservationController {
       '해당 id의 예약생성 (해당 id와 토큰 id 확인), 관리자의 경우 모든 예약 정보 생성 가능',
   })
   create(
-    @Param('user_id') userId: string,
+    @Param('user_no') userNo: number,
     @Body() createReservationDto: CreateReservationDto,
     @Req() req,
   ) {
-    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userId);
+    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userNo);
     if (isAllowed) {
-      return this.reservationService.create(userId, createReservationDto);
+      return this.reservationService.create(userNo, createReservationDto);
     }
     throw new UnauthorizedException();
   }

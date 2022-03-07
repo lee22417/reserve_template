@@ -14,10 +14,10 @@ export class ReservationService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(userId: string, createReservationDto: CreateReservationDto) {
+  async create(userNo: number, createReservationDto: CreateReservationDto) {
     const reservation = await this.rRepository.save(createReservationDto);
     // connect reservation to user
-    reservation.user = await this.userRepository.findOne({ id: userId });
+    reservation.user = await this.userRepository.findOne({ no: userNo });
     await this.rRepository.save(reservation);
     delete reservation.user;
     return reservation;
@@ -48,9 +48,9 @@ export class ReservationService {
   }
 
   // find by user id
-  async findByUserId(userId: string) {
+  async findByUserNo(userNo: number) {
     const reservations = await this.rRepository.find({
-      where: { user: { id: userId } },
+      where: { user: { no: userNo } },
       relations: ['user', 'payments'],
     });
     reservations.forEach((row) => {

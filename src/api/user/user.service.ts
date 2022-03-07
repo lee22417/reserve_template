@@ -59,28 +59,30 @@ export class UserService {
   }
 
   // find id, name of selected user
-  async findOne(id: string): Promise<User> {
+  async findOne(no: number): Promise<User> {
     return await this.userRepository.findOne({
-      where: { id: id, is_quit: false },
-      select: ['id', 'name'],
+      where: { no: no, is_quit: false },
+      select: ['id', 'name', 'email', 'phone_number'],
     });
   }
 
   // update user information
-  async update(id: string, updateUserDto: UpdateUserDto, chargeId: string) {
+  async update(no: number, updateUserDto: UpdateUserDto, chargeId: string) {
     if (!updateUserDto.id) {
       try {
+        const user = await User.findByNo(no);
+
         // convert dto to plain
         const updateRows = classToPlain(updateUserDto);
         // save update history
-        const user = await User.findById(id);
         let isLogCreated = false;
         Object.keys(updateRows).map(async (key) => {
           const log = await UserLog.createAndSave(key, user[key], updateRows[key], chargeId, user);
           isLogCreated = log ? true : false;
         });
+
         // update user information
-        await User.updateById(id, updateRows);
+        await this.userRepository.update(no, updateUserDto);
         return { statusCode: HttpStatus.OK, msg: 'Updated' };
       } catch (e) {
         console.log(e.message);
@@ -96,9 +98,9 @@ export class UserService {
   }
 
   // update user as quit
-  async quit(id: string, chargeId) {
+  async quit(no: number, chargeId: string) {
     try {
-      const user = await User.findById(id);
+      const user = await User.findByNo(no);
       const log = await UserLog.createAndSave(
         'is_quit',
         user.is_quit ? 'true' : 'false',
@@ -111,7 +113,7 @@ export class UserService {
           .createQueryBuilder()
           .update(User)
           .set({ is_quit: true })
-          .where('id = :id', { id: id })
+          .where('no = :no', { no: no })
           .execute();
         return { statusCode: HttpStatus.OK, msg: 'Success' };
       } else {
@@ -125,10 +127,10 @@ export class UserService {
   }
 
   // update user authority as admin
-  async grantAdmin(id: string, chargeId: string) {
+  async grantAdmin(no: number, chargeId: string) {
     try {
       // save who give authority
-      const user = await User.findById(id);
+      const user = await User.findByNo(no);
       const log = await UserLog.createAndSave(
         'is_admin',
         user.is_admin ? 'true' : 'false',
@@ -141,7 +143,7 @@ export class UserService {
           .createQueryBuilder()
           .update(User)
           .set({ is_admin: true })
-          .where('id = :id', { id: id })
+          .where('no = :no', { no: no })
           .execute();
         return { statusCode: HttpStatus.OK, msg: 'Updated' };
       }

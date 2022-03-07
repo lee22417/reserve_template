@@ -25,7 +25,7 @@ export class AuthService {
 
   // login - get JWT token
   async getToken(user: any) {
-    const payload = { id: user.id, is_admin: user.is_admin };
+    const payload = { no: user.no, id: user.id, is_admin: user.is_admin };
     const accessToken = await this.jwtService.sign(payload);
     return {
       access_token: accessToken,

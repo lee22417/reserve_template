@@ -39,7 +39,7 @@ export class PaymentController {
     @Req() req,
   ) {
     const user = await User.findByReservationNo(reservationNo);
-    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, user.id);
+    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, user.no);
     if (isAllowed) {
       return await this.paymentService.create(reservationNo, createPaymentDto);
     }
