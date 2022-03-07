@@ -51,6 +51,7 @@ export class User extends BaseEntity {
   @OneToMany(() => UserLog, (log) => log.target)
   logs: UserLog[];
 
+  // create new user
   static async createAndSave(id: string, name: string, password: string) {
     const user = new User();
     user.id = id;
@@ -58,26 +59,29 @@ export class User extends BaseEntity {
     user.password = password;
   }
 
+  // find user by no
   static async findByNo(no: number) {
-    return await this.findOne({ no: no });
+    const user = await this.findOne({ no: no, is_quit: false });
+    delete user.password;
+    return user;
   }
 
+  // find user by id
   static async findById(id: string) {
-    return await this.findOne({ id: id });
+    const user = await this.findOne({ id: id, is_quit: false });
+    delete user.password;
+    return user;
   }
 
+  // find user by reservation.no
   static async findByReservationNo(reservation_no: number) {
-    return await this.findOne({
+    const user = await this.findOne({
       where: {
         reservations: { no: reservation_no },
       },
       relations: ['reservations'],
     });
-  }
-
-  static async updateById(id: string, rows) {
-    const user = await this.findById(id);
-    Object.keys(rows).map((key) => (user[key] = rows[key]));
-    return await user.save();
+    delete user.password;
+    return user;
   }
 }

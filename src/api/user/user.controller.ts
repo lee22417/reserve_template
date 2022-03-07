@@ -35,6 +35,7 @@ export class UserController {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     // only admin can access
     if (isAdmin) {
+      // get all the user information
       return {
         statusCode: HttpStatus.OK,
         message: 'Success',
@@ -46,10 +47,11 @@ export class UserController {
 
   @Get(':no')
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: '회원정보 API', description: '해당 id의 화원정보 확인' })
+  @ApiOperation({ summary: '회원정보 API', description: '해당 no의 화원정보 확인' })
   async findOne(@Param('no') no: number, @Req() req) {
     const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, no);
     if (isAllowed) {
+      // get target [no] user information
       return await this.userService.findOne(no);
     }
     throw new UnauthorizedException();
@@ -65,6 +67,7 @@ export class UserController {
   async update(@Param('no') no: number, @Body() updateUserDto: UpdateUserDto, @Req() req) {
     const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, no);
     if (isAllowed) {
+      // update target user information
       return await this.userService.update(no, updateUserDto, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();
@@ -80,6 +83,7 @@ export class UserController {
   async remove(@Param('no') no: number, @Req() req) {
     const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, no);
     if (isAllowed) {
+      // update target user status as quit
       return await this.userService.quit(no, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();
@@ -94,6 +98,7 @@ export class UserController {
   async grantAdmin(@Param('no') no: number, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
+      // grant admin access to target user
       return await this.userService.grantAdmin(no, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();

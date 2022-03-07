@@ -26,14 +26,15 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const sameId = await this.userRepository.findOne({ id: createUserDto.id });
     if (sameId && !sameId.is_quit) {
-      // joined id, not quit
+      // id - joined, not quit
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Already existed id',
       });
     }
     if (sameId && sameId.is_quit) {
-      // joined id, quit, can not use id currently
+      // id - joined, quit
+      // the id can not be  used currently
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Already existed id',
@@ -58,7 +59,7 @@ export class UserService {
     return await this.userRepository.find({ select: ['id', 'name'], where: { is_quit: false } });
   }
 
-  // find id, name of selected user
+  // find id, name of target user
   async findOne(no: number): Promise<User> {
     return await this.userRepository.findOne({
       where: { no: no, is_quit: false },
@@ -71,22 +72,28 @@ export class UserService {
     if (!updateUserDto.id) {
       try {
         const user = await User.findByNo(no);
+        if (user) {
+          // convert dto to plain
+          const updateRows = classToPlain(updateUserDto);
+          // save update history in user_log
+          Object.keys(updateRows).map(async (key) => {
+            const log = await UserLog.createAndSave(
+              key,
+              user[key],
+              updateRows[key],
+              chargeId,
+              user,
+            );
+          });
 
-        // convert dto to plain
-        const updateRows = classToPlain(updateUserDto);
-        // save update history
-        let isLogCreated = false;
-        Object.keys(updateRows).map(async (key) => {
-          const log = await UserLog.createAndSave(key, user[key], updateRows[key], chargeId, user);
-          isLogCreated = log ? true : false;
-        });
-
-        // update user information
-        await this.userRepository.update(no, updateUserDto);
-        return { statusCode: HttpStatus.OK, msg: 'Updated' };
+          // update in user
+          await this.userRepository.update(no, updateUserDto);
+          return { statusCode: HttpStatus.OK, msg: 'Updated' };
+        } else {
+          return { statusCode: HttpStatus.BAD_REQUEST, msg: 'No User Found' };
+        }
       } catch (e) {
         console.log(e.message);
-        console.log(e.body);
         return { statusCode: e.code, msg: e.body };
       }
     } else {
@@ -101,14 +108,17 @@ export class UserService {
   async quit(no: number, chargeId: string) {
     try {
       const user = await User.findByNo(no);
-      const log = await UserLog.createAndSave(
-        'is_quit',
-        user.is_quit ? 'true' : 'false',
-        'true',
-        chargeId,
-        user,
-      );
-      if (log) {
+      // if user is not quit
+      if (user && user.is_quit) {
+        const log = await UserLog.createAndSave(
+          'is_quit',
+          user.is_quit ? 'true' : 'false',
+          'true',
+          chargeId,
+          user,
+        );
+
+        // update user.is_quit as true
         await this.userRepository
           .createQueryBuilder()
           .update(User)
@@ -117,11 +127,10 @@ export class UserService {
           .execute();
         return { statusCode: HttpStatus.OK, msg: 'Success' };
       } else {
-        return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, msg: 'Error occurs' };
+        return { statusCode: HttpStatus.BAD_REQUEST, msg: 'No User Found' };
       }
     } catch (e) {
       console.log(e.message);
-      console.log(e.body);
       return { statusCode: e.code, msg: e.body };
     }
   }
@@ -129,16 +138,17 @@ export class UserService {
   // update user authority as admin
   async grantAdmin(no: number, chargeId: string) {
     try {
-      // save who give authority
+      // save who give authority in user_log
       const user = await User.findByNo(no);
-      const log = await UserLog.createAndSave(
-        'is_admin',
-        user.is_admin ? 'true' : 'false',
-        'true',
-        chargeId,
-        user,
-      );
-      if (log) {
+      if (user) {
+        const log = await UserLog.createAndSave(
+          'is_admin',
+          user.is_admin ? 'true' : 'false',
+          'true',
+          chargeId,
+          user,
+        );
+        // update is_admin as true in user
         await this.userRepository
           .createQueryBuilder()
           .update(User)
@@ -146,10 +156,11 @@ export class UserService {
           .where('no = :no', { no: no })
           .execute();
         return { statusCode: HttpStatus.OK, msg: 'Updated' };
+      } else {
+        return { statusCode: HttpStatus.BAD_REQUEST, msg: 'No User Found' };
       }
     } catch (e) {
       console.log(e.message);
-      console.log(e.body);
       return { statusCode: e.code, msg: e.body };
     }
   }
