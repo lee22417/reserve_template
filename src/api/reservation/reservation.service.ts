@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation } from 'src/entities/reservation.entity';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { User } from 'src/entities/user.entity';
+import { ReservationLog } from 'src/entities/reservationLog.entity';
+import { CommonFormat } from 'src/common/common.format';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class ReservationService {
@@ -12,70 +15,132 @@ export class ReservationService {
     @InjectRepository(Reservation) private rRepository: Repository<Reservation>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private readonly commonFormat: CommonFormat,
   ) {}
 
-  async create(userNo: number, createReservationDto: CreateReservationDto) {
+  // create new reservation
+  async create(userNo: number, createReservationDto: CreateReservationDto, chargeId: string) {
+    // create in reservation
     const reservation = await this.rRepository.save(createReservationDto);
+    // create log in reservation log
+    await ReservationLog.createAndSave('create', '', '', chargeId, reservation);
     // connect reservation to user
-    reservation.user = await this.userRepository.findOne({ no: userNo });
+    reservation.user = await User.findByNo(userNo);
+    // change format from string to date
+    reservation.reserved_at = new Date(reservation.reserved_at);
     await this.rRepository.save(reservation);
-    delete reservation.user;
-    return reservation;
+    return { statusCode: HttpStatus.CREATED, reservation: reservation };
   }
 
+  // find all reservation
   async findAll(isAdmin: boolean = false) {
     if (isAdmin == true) {
-      // admin
-      return await this.rRepository.find({
+      // admin - get all reservation information
+      const reservations = await this.rRepository.find({
         select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
+        order: { reserved_at: 'DESC' },
         relations: ['payments'],
       });
+      return { statusCode: HttpStatus.OK, reservations: reservations };
     } else {
       // public
-      return await this.rRepository.find({
-        select: ['reserved_at', 'is_canceled'],
+      // get all reservation dates which is valid
+      const reservations = await this.rRepository.find({
+        select: ['reserved_at'],
+        where: { is_canceled: false },
+        order: { reserved_at: 'DESC' },
       });
+      return { statusCode: HttpStatus.OK, reservations: reservations };
     }
   }
 
-  // find by pk
+  // find reservation by no
   async findOne(no: number) {
-    return await this.rRepository.findOne({
-      where: { no: no },
+    const reservation = await this.rRepository.findOne({
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
+      where: { no: no },
       relations: ['user', 'payments'],
     });
+    // delete user password
+    delete reservation.user.password;
+    return { statusCode: HttpStatus.OK, reservation: reservation };
   }
 
-  // find by user id
+  // find reservation by user id
   async findByUserNo(userNo: number) {
+    // select reservation with payments
     const reservations = await this.rRepository.find({
+      select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
       where: { user: { no: userNo } },
       relations: ['user', 'payments'],
     });
-    reservations.forEach((row) => {
+    reservations.map((row) => {
       // delete user information
       delete row.user;
     });
-    return reservations;
+    return { statusCode: HttpStatus.OK, reservations: reservations };
   }
 
-  // reservation date
+  // find reservation by date
   async findByDate(date) {
-    return await this.rRepository.find({
-      where: { reserved_at: date },
-      select: ['no', 'reserved_at', 'is_canceled'],
-    });
+    const fromDate = new Date(date); // from date
+    const toDate = this.commonFormat.strtotime(new Date(date), { hour: 24 }); // to date
+
+    // get reservation between from and to date
+    const reservations = await this.rRepository
+      .createQueryBuilder('r')
+      .select('r.reserved_at')
+      .where('reserved_at >= :from_date', { from_date: date })
+      .andWhere('reserved_at < :to_date', { to_date: toDate })
+      .andWhere('is_canceled = :is_canceled', { is_canceled: false })
+      .getMany();
+    return { statusCode: HttpStatus.OK, reservations: reservations };
   }
 
-  async update(no: number, updateReservationDto: UpdateReservationDto) {
-    return await this.rRepository.update(no, updateReservationDto);
+  // update reservation by no
+  async update(no: number, updateReservationDto: UpdateReservationDto, chargeId: string) {
+    const reservation = await Reservation.findByNo(no);
+    // reservation is valid
+    if (reservation && !reservation.is_canceled) {
+      // convert dto to plain
+      const updateRows = classToPlain(updateReservationDto);
+      // save update history in reservation_log
+      Object.keys(updateRows).map(async (key) => {
+        await ReservationLog.createAndSave(
+          key,
+          reservation[key],
+          updateRows[key],
+          chargeId,
+          reservation,
+        );
+      });
+
+      // update in reservation
+      await this.rRepository.update(no, updateReservationDto);
+      return { statusCode: HttpStatus.OK, msg: 'Updated' };
+    } else {
+      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'No Reservation Found' };
+    }
   }
 
-  async cancel(no: number) {
-    const reservation = await this.findOne(no);
-    reservation.is_canceled = true;
-    await this.rRepository.save(reservation);
-    return reservation;
+  // update reservation.is_cancel by no
+  async cancel(no: number, chargeId: string) {
+    const reservation = await Reservation.findByNo(no);
+    if (reservation && !reservation.is_canceled) {
+      // create log in reservation log
+      await ReservationLog.createAndSave(
+        'is_canceled',
+        reservation.is_canceled ? 'true' : 'false',
+        'true',
+        chargeId,
+        reservation,
+      );
+      // update is_canceled as true
+      reservation.is_canceled = true;
+      await this.rRepository.save(reservation);
+      return { statusCode: HttpStatus.OK, msg: 'Updated' };
+    } else {
+      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'No Reservation Found' };
+    }
   }
 }

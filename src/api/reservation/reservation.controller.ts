@@ -15,6 +15,29 @@ export class ReservationController {
     private readonly commonAuth: CommonAuth,
   ) {}
 
+  @Post(':user_no')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: '예약생성 API',
+    description:
+      '해당 no의 예약생성 (해당 no와 토큰 no확인), 관리자의 경우 모든 예약 정보 생성 가능',
+  })
+  create(
+    @Param('user_no') userNo: number,
+    @Body() createReservationDto: CreateReservationDto,
+    @Req() req,
+  ) {
+    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userNo);
+    if (isAllowed) {
+      return this.reservationService.create(
+        userNo,
+        createReservationDto,
+        req.app.locals.payload.id,
+      );
+    }
+    throw new UnauthorizedException();
+  }
+
   @Get()
   @ApiOperation({ summary: '예약리스트 API' })
   @ApiQuery({
@@ -32,35 +55,17 @@ export class ReservationController {
   findAll(@Req() req, @Query('user') user: number, @Query('date') date) {
     // search option : date | userId
     if (date) {
+      // get reservations by date
       return this.reservationService.findByDate(date);
     } else if (user) {
       const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, user);
       if (isAllowed) {
-        // admin or userself can see information
+        // admin or userself can see target user
         return this.reservationService.findByUserNo(user);
       }
     } else {
       const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
       return this.reservationService.findAll(isAdmin);
-    }
-    throw new UnauthorizedException();
-  }
-
-  @Post(':user_no')
-  @ApiBearerAuth('access-token')
-  @ApiOperation({
-    summary: '예약생성 API',
-    description:
-      '해당 id의 예약생성 (해당 id와 토큰 id 확인), 관리자의 경우 모든 예약 정보 생성 가능',
-  })
-  create(
-    @Param('user_no') userNo: number,
-    @Body() createReservationDto: CreateReservationDto,
-    @Req() req,
-  ) {
-    const isAllowed = this.commonAuth.isAdminOrUserself(req.app.locals.payload, userNo);
-    if (isAllowed) {
-      return this.reservationService.create(userNo, createReservationDto);
     }
     throw new UnauthorizedException();
   }
@@ -71,7 +76,7 @@ export class ReservationController {
   findOne(@Param('no') no: string, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
-      // only admin can search reservation information
+      // only admin can search reservation
       return this.reservationService.findOne(+no);
     }
     throw new UnauthorizedException();
@@ -80,11 +85,11 @@ export class ReservationController {
   @Patch(':no')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: '예약 업데이트 API', description: '관리자가 해당 예약 업데이트 확인' })
-  update(@Param('no') no: string, @Body() updateReservationDto: UpdateReservationDto, @Req() req) {
+  update(@Param('no') no: number, @Body() updateReservationDto: UpdateReservationDto, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
-      // only admin can update reservation information
-      return this.reservationService.update(+no, updateReservationDto);
+      // only admin can update reservation
+      return this.reservationService.update(no, updateReservationDto, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();
   }
@@ -92,11 +97,11 @@ export class ReservationController {
   @Delete(':no')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: '예약 취소 API', description: '관리자가 해당 예약 취소 확인' })
-  remove(@Param('no') no: string, @Req() req) {
+  remove(@Param('no') no: number, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
       // only admin can cancel reservation
-      return this.reservationService.cancel(+no);
+      return this.reservationService.cancel(no, req.app.locals.payload.id);
     }
     throw new UnauthorizedException();
   }

@@ -51,20 +51,25 @@ export class UserService {
     createUserDto.password = await this.hashingPassword(createUserDto.password);
     // create id
     const { password, ...result } = await this.userRepository.save(createUserDto);
-    return result;
+    return { statusCode: HttpStatus.CREATED, user: result };
   }
 
   // find id, name of all users
   async findAll() {
-    return await this.userRepository.find({ select: ['id', 'name'], where: { is_quit: false } });
+    const users = await this.userRepository.find({
+      select: ['id', 'name'],
+      where: { is_quit: false },
+    });
+    return { statusCode: HttpStatus.OK, users: users };
   }
 
   // find id, name of target user
-  async findOne(no: number): Promise<User> {
-    return await this.userRepository.findOne({
+  async findOne(no: number) {
+    const user = await this.userRepository.findOne({
       where: { no: no, is_quit: false },
       select: ['id', 'name', 'email', 'phone_number'],
     });
+    return { statusCode: HttpStatus.OK, user: user };
   }
 
   // update user information
@@ -72,18 +77,13 @@ export class UserService {
     if (!updateUserDto.id) {
       try {
         const user = await User.findByNo(no);
-        if (user) {
+        // user is valid
+        if (user && !user.is_quit) {
           // convert dto to plain
           const updateRows = classToPlain(updateUserDto);
           // save update history in user_log
           Object.keys(updateRows).map(async (key) => {
-            const log = await UserLog.createAndSave(
-              key,
-              user[key],
-              updateRows[key],
-              chargeId,
-              user,
-            );
+            await UserLog.createAndSave(key, user[key], updateRows[key], chargeId, user);
           });
 
           // update in user
@@ -108,7 +108,7 @@ export class UserService {
   async quit(no: number, chargeId: string) {
     try {
       const user = await User.findByNo(no);
-      // if user is not quit
+      // user is valid
       if (user && user.is_quit) {
         const log = await UserLog.createAndSave(
           'is_quit',
