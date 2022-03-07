@@ -6,10 +6,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Reservation } from './reservation.entity';
 import { User } from './user.entity';
 
-@Entity({ name: 'user_log' })
-export class UserLog extends BaseEntity {
+@Entity({ name: 'reservation_log' })
+export class ReservationLog extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   no: number;
 
@@ -28,22 +29,22 @@ export class UserLog extends BaseEntity {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => User, (user) => user.logs)
-  target: User; // 해당하는 회원
+  @ManyToOne(() => Reservation, (reservation) => reservation.logs)
+  target: Reservation; // 해당하는 회원
 
   static async createAndSave(
     column: string,
     old_row: string,
     row: string,
     charge_id: string,
-    user: User,
+    reservation: Reservation,
   ) {
-    const log = new UserLog();
+    const log = new ReservationLog();
     log.column = column;
     log.old_row = old_row;
     log.row = row;
     log.charge_id = charge_id;
-    log.target = user;
+    log.target = reservation;
     return await log.save();
   }
 }

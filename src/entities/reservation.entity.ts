@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Payment } from './payment.entity';
+import { ReservationLog } from './reservationLog.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'reservation' })
@@ -41,6 +42,9 @@ export class Reservation extends BaseEntity {
 
   @OneToMany(() => Payment, (payment) => payment.reservation)
   payments: Payment[];
+
+  @OneToMany(() => ReservationLog, (log) => log.target)
+  logs: ReservationLog[];
 
   static async findByNo(no: number) {
     return this.findOne({ no: no });

@@ -66,10 +66,9 @@ export class User extends BaseEntity {
     return user;
   }
 
-  // find user by id
+  // find user by id - user for login - has password
   static async findById(id: string) {
     const user = await this.findOne({ id: id, is_quit: false });
-    delete user.password;
     return user;
   }
 
