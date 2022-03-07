@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { Reservation } from './reservation.entity';
 
-@Entity({ name: 'pay' })
+@Entity({ name: 'payment' })
 export class Payment extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   no: number;
