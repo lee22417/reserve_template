@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from 'src/entities/payment.entity';
 import { Reservation } from 'src/entities/reservation.entity';
@@ -13,13 +13,34 @@ export class PaymentService {
     @InjectRepository(Payment) private pRepository: Repository<Payment>,
   ) {}
 
-  async create(reservationNo, createPaymentDto: CreatePaymentDto) {
+  async create(reservationNo: number, createPaymentDto: CreatePaymentDto) {
+    // get releated reservation
+    const reservation = await Reservation.findByNo(reservationNo);
+    if (!reservation) {
+      return { statusCode: HttpStatus.BAD_REQUEST, msg: ' No Reservation Exist' };
+    } else {
+      // if payment exist
+      if (reservation.payments) {
+        // cumulate price, calcuate remained price
+        const remainPrice = reservation.payments.reduce((acc, cur, idx) => {
+          return (acc -= cur.price);
+        }, reservation.price);
+        console.log(remainPrice);
+        // check price
+        if (remainPrice < createPaymentDto.price) {
+          return { statusCode: HttpStatus.BAD_REQUEST, msg: 'Not Valid Price' };
+        }
+      }
+    }
+
+    // save
     const payment = await this.pRepository.save(createPaymentDto);
     // connect to reservation
-    payment.reservation = await Reservation.findByNo(reservationNo);
+    payment.reservation = reservation;
     await this.pRepository.save(payment);
     delete payment.reservation;
-    return payment;
+
+    return { statusCode: HttpStatus.OK, payment: payment };
   }
 
   update(id: number, updatePaymentDto: UpdatePaymentDto) {

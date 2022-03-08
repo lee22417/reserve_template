@@ -47,7 +47,7 @@ export class Reservation extends BaseEntity {
   logs: ReservationLog[];
 
   static async findByNo(no: number) {
-    return this.findOne({ no: no });
+    return this.findOne({ where: { no: no }, relations: ['payments'] });
   }
 
   static async findByPaymentNo(payment_no: number) {

@@ -1,14 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { PaymentMethod } from 'src/entities/payment.entity';
 
 export class CreatePaymentDto {
   @IsNumber()
   @ApiProperty({ description: '해당 결제건 결제 금액', example: '10000' })
-  partial_price: number;
+  price: number;
 
-  @IsNumber()
-  @ApiProperty({ description: '결제 유형', example: 'card' })
-  method: string;
+  @IsNotEmpty()
+  @ApiProperty({ description: '결제 유형', example: 'CART / BANK' })
+  method: PaymentMethod;
 
   @IsOptional()
   @IsNumber()

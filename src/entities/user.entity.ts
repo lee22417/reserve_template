@@ -74,12 +74,10 @@ export class User extends BaseEntity {
 
   // find user by reservation.no
   static async findByReservationNo(reservation_no: number) {
-    const user = await this.findOne({
-      where: {
-        reservations: { no: reservation_no },
-      },
-      relations: ['reservations'],
-    });
+    const user = await this.createQueryBuilder('user')
+      .leftJoin('user.reservations', 'reservation')
+      .where('reservation.no = :no', { no: reservation_no })
+      .getOne();
     delete user.password;
     return user;
   }

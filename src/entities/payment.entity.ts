@@ -11,18 +11,24 @@ import {
 } from 'typeorm';
 import { Reservation } from './reservation.entity';
 
+export enum PaymentMethod {
+  CARD = 'CARD',
+  BANK = 'BANK', // send via bank
+  DEF = 'NULL',
+}
+
 @Entity({ name: 'payment' })
 export class Payment extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   no: number;
 
   @Column('int', { nullable: false, comment: '해당 결제건 결제 금액' })
-  partial_price: number;
+  price: number;
 
-  @Column('varchar', { length: 20, comment: '결제 유형' })
-  method: string;
+  @Column('enum', { enum: PaymentMethod, default: PaymentMethod.DEF, comment: '결제 유형' })
+  method: PaymentMethod;
 
-  @Column('varchar', { length: 100, comment: '결제 카드사/은행명' })
+  @Column('varchar', { length: 100, default: '', comment: '결제 카드사/은행명' })
   bank: string;
 
   @Column('boolean', { default: false, comment: '환불 여부' })
