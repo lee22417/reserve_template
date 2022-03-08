@@ -77,6 +77,7 @@ export class ReservationService {
     const reservations = await this.rRepository.find({
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
       where: { user: { no: userNo } },
+      order: { reserved_at: 'DESC' },
       relations: ['user', 'payments'],
     });
     reservations.map((row) => {
@@ -100,6 +101,7 @@ export class ReservationService {
       .where('reserved_at >= :from_date', { from_date: fromDate })
       .andWhere('reserved_at < :to_date', { to_date: toDate })
       .andWhere('is_canceled = :is_canceled', { is_canceled: false })
+      .orderBy('reserved_at', 'DESC')
       .getMany();
 
     return { statusCode: HttpStatus.OK, reservations: reservations };
@@ -173,5 +175,7 @@ export class ReservationService {
     reservation.remained_price = reservation.payments.reduce((acc, cur, idx) => {
       return cur.is_refund ? acc : (acc -= cur.price);
     }, reservation.price);
+    // get total paid price
+    reservation.paid_price = reservation.price - reservation.remained_price;
   }
 }

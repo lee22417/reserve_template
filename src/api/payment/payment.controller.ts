@@ -54,7 +54,7 @@ export class PaymentController {
     description:
       '환불여부로 취소된 결졔정보 확인, 관리자만 확인가능 | null : 모든 취소된 예약 결제정보, true : 환불완료 취소된 예약 결제정보, false : 환불전 취소된 예약 결제정보',
     type: 'boolean',
-    required: true,
+    required: false,
   })
   async findRefund(@Query('refund') refund: string, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
