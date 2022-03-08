@@ -73,11 +73,11 @@ export class ReservationController {
   @Get(':no')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: '예약리스트 API', description: '관리자가 해당 예약리스트 확인' })
-  findOne(@Param('no') no: string, @Req() req) {
+  findOne(@Param('no') no: number, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
       // only admin can search reservation
-      return this.reservationService.findOne(+no);
+      return this.reservationService.findByNo(no);
     }
     throw new UnauthorizedException();
   }

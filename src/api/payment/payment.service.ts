@@ -21,11 +21,10 @@ export class PaymentService {
     } else {
       // if payment exist
       if (reservation.payments) {
-        // cumulate price, calcuate remained price
+        // cumulate price, calculate remained price
         const remainPrice = reservation.payments.reduce((acc, cur, idx) => {
           return (acc -= cur.price);
         }, reservation.price);
-        console.log(remainPrice);
         // check price
         if (remainPrice < createPaymentDto.price) {
           return { statusCode: HttpStatus.BAD_REQUEST, msg: 'Not Valid Price' };

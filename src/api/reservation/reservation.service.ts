@@ -42,7 +42,9 @@ export class ReservationService {
         order: { reserved_at: 'DESC' },
         relations: ['payments'],
       });
-      return { statusCode: HttpStatus.OK, reservations: reservations };
+      // get remained_price for each reservation
+      const reservObj = this.getReservationsWithRemainedPrice(reservations);
+      return { statusCode: HttpStatus.OK, reservations: reservObj };
     } else {
       // public
       // get all reservation dates which is valid
@@ -56,12 +58,14 @@ export class ReservationService {
   }
 
   // find reservation by no
-  async findOne(no: number) {
+  async findByNo(no: number) {
     const reservation = await this.rRepository.findOne({
       select: ['no', 'reserved_at', 'num_of_people', 'price', 'is_canceled'],
       where: { no: no },
       relations: ['user', 'payments'],
     });
+    // get reservation remained_price
+    this.getRemainedPrice(reservation);
     // delete user password
     delete reservation.user.password;
     return { statusCode: HttpStatus.OK, reservation: reservation };
@@ -79,7 +83,9 @@ export class ReservationService {
       // delete user information
       delete row.user;
     });
-    return { statusCode: HttpStatus.OK, reservations: reservations };
+    // get remained_price for each reservation
+    const reservObj = this.getReservationsWithRemainedPrice(reservations);
+    return { statusCode: HttpStatus.OK, reservations: reservObj };
   }
 
   // find reservation by date
@@ -91,10 +97,11 @@ export class ReservationService {
     const reservations = await this.rRepository
       .createQueryBuilder('r')
       .select('r.reserved_at')
-      .where('reserved_at >= :from_date', { from_date: date })
+      .where('reserved_at >= :from_date', { from_date: fromDate })
       .andWhere('reserved_at < :to_date', { to_date: toDate })
       .andWhere('is_canceled = :is_canceled', { is_canceled: false })
       .getMany();
+
     return { statusCode: HttpStatus.OK, reservations: reservations };
   }
 
@@ -143,5 +150,28 @@ export class ReservationService {
     } else {
       return { statusCode: HttpStatus.BAD_REQUEST, msg: 'No Reservation Found' };
     }
+  }
+
+  // ---- internal ---
+  // get remained_price for each reservation
+  getReservationsWithRemainedPrice(reservations) {
+    // more than one reservations
+    if (Array.isArray(reservations)) {
+      // change class to objecgt
+      const reservObj = classToPlain(reservations);
+      // set remained_price for each reservation
+      reservObj.map((reservation) => {
+        this.getRemainedPrice(reservation);
+      });
+      return reservObj;
+    }
+  }
+
+  // get remained_price in reservation
+  getRemainedPrice(reservation) {
+    // cumulate price, calculate remained price
+    reservation.remained_price = reservation.payments.reduce((acc, cur, idx) => {
+      return (acc -= cur.price);
+    }, reservation.price);
   }
 }
