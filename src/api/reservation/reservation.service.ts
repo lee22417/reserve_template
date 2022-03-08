@@ -131,7 +131,7 @@ export class ReservationService {
     }
   }
 
-  // update reservation.is_cancel by no
+  // cancel reservation
   async cancel(no: number, chargeId: string) {
     const reservation = await Reservation.findByNo(no);
     if (reservation && !reservation.is_canceled) {
@@ -171,7 +171,7 @@ export class ReservationService {
   getRemainedPrice(reservation) {
     // cumulate price, calculate remained price
     reservation.remained_price = reservation.payments.reduce((acc, cur, idx) => {
-      return (acc -= cur.price);
+      return cur.is_refund ? acc : (acc -= cur.price);
     }, reservation.price);
   }
 }

@@ -16,10 +16,10 @@ export class PaymentService {
   async create(reservationNo: number, createPaymentDto: CreatePaymentDto) {
     // get releated reservation
     const reservation = await Reservation.findByNo(reservationNo);
-    if (!reservation) {
+    if (!reservation || reservation.is_canceled) {
       return { statusCode: HttpStatus.BAD_REQUEST, msg: ' No Reservation Exist' };
     } else {
-      // if payment exist
+      // if payment exist and not canceled
       if (reservation.payments) {
         // cumulate price, calculate remained price
         const remainPrice = reservation.payments.reduce((acc, cur, idx) => {
@@ -38,11 +38,23 @@ export class PaymentService {
     payment.reservation = reservation;
     await this.pRepository.save(payment);
     delete payment.reservation;
-
     return { statusCode: HttpStatus.OK, payment: payment };
   }
 
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
+  // find list by is_refund
+  async findRefund(isRefund: string = null) {
+    const payments = await Payment.findRefund(isRefund);
+    return { statusCode: HttpStatus.OK, payments: payments };
+  }
+
+  // refund payment
+  async refund(no: number, chargeId: string) {
+    const payment = await Payment.findByNo(no);
+    // update is_refund as true
+    payment.is_refund = true;
+    payment.refund_at = new Date();
+    payment.log = payment.log += 'refund approval : ' + chargeId;
+    await this.pRepository.save(payment);
+    return { statusCode: HttpStatus.OK, msg: 'Success' };
   }
 }

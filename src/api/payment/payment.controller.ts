@@ -13,7 +13,7 @@ import {
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CommonAuth } from 'src/common/common.auth';
 import { Reservation } from 'src/entities/reservation.entity';
 import { User } from 'src/entities/user.entity';
@@ -46,16 +46,35 @@ export class PaymentController {
     throw new UnauthorizedException();
   }
 
-  @Patch(':no')
+  @Get('/refund')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: '결제내역 환불 리스트 API' })
+  @ApiQuery({
+    name: 'refund',
+    description:
+      '환불여부로 취소된 결졔정보 확인, 관리자만 확인가능 | null : 모든 취소된 예약 결제정보, true : 환불완료 취소된 예약 결제정보, false : 환불전 취소된 예약 결제정보',
+    type: 'boolean',
+    required: true,
+  })
+  async findRefund(@Query('refund') refund: string, @Req() req) {
+    const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
+    if (isAdmin) {
+      return await this.paymentService.findRefund(refund);
+    }
+    throw new UnauthorizedException();
+  }
+
+  @Patch('/refund/:no')
   @ApiBearerAuth('access-token')
   @ApiOperation({
-    summary: '결제내역 업데이트 API',
-    description: '해당 id의 결제내역 업데이트, 관리자만 결제내역 업데이트 가능',
+    summary: '결제내역 환불 API',
+    description: '해당 id의 결제 환불, 관리자만 결제내역 업데이트 가능',
   })
   async update(@Param('no') no: number, @Body() updatePaymentDto: UpdatePaymentDto, @Req() req) {
     const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
     if (isAdmin) {
-      // return this.paymentService.update(+id, updatePaymentDto);
+      return await this.paymentService.refund(no, req.app.locals.payload.id);
     }
+    throw new UnauthorizedException();
   }
 }

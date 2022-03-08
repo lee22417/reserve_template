@@ -3,9 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -31,11 +29,14 @@ export class Payment extends BaseEntity {
   @Column('varchar', { length: 100, default: '', comment: '결제 카드사/은행명' })
   bank: string;
 
+  @Column('boolean', { default: false, comment: '결제 성공 여부' })
+  is_succeeded: boolean;
+
   @Column('boolean', { default: false, comment: '환불 여부' })
   is_refund: boolean;
 
-  @Column('boolean', { default: false, comment: '결제 성공 여부' })
-  is_succeeded: boolean;
+  @Column('datetime', { default: null, comment: '환불 일자' })
+  refund_at: Date;
 
   @CreateDateColumn()
   created_at: Date;
@@ -51,5 +52,20 @@ export class Payment extends BaseEntity {
 
   static async findByNo(no: number) {
     return this.findOne({ no: no });
+  }
+
+  // get payment of canceled reservations
+  static async findRefund(is_refund_ori: string) {
+    const query: any = {
+      where: {
+        reservation: { is_canceled: true },
+      },
+      relations: ['reservation'],
+    };
+    const is_refund = is_refund_ori ? (is_refund_ori == 'true' ? true : false) : null;
+    if (is_refund_ori) {
+      query.where.is_refund = is_refund;
+    }
+    return this.find(query);
   }
 }
