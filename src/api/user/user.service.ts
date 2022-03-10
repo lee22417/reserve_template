@@ -26,20 +26,30 @@ export class UserService {
   // create user
   async create(createUserDto: CreateUserDto) {
     const sameId = await this.userRepository.findOne({ id: createUserDto.id });
-    if (sameId && !sameId.is_quit) {
-      // id - joined, not quit
-      throw new BadRequestException({
+    const samePhone = await this.userRepository.findOne({
+      phone_number: createUserDto.phone_number,
+    });
+    if (samePhone) {
+      // phone number - unique
+      return {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Already existed id',
-      });
+        message: 'Already Taken Phone Number',
+      };
+    }
+    if (sameId && !sameId.is_quit) {
+      // id - exist, not quit
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Already Taken Id',
+      };
     }
     if (sameId && sameId.is_quit) {
-      // id - joined, quit
-      // the id can not be  used currently
-      throw new BadRequestException({
+      // id - exist, quit
+      // the id can not be used currently
+      return {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Already existed id',
-      });
+        message: 'Already Taken Id',
+      };
       // delete old account
       // await this.userRepository
       //   .createQueryBuilder()
