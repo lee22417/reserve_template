@@ -20,16 +20,42 @@ export class ReservationService {
   ) {}
 
   // create new reservation
-  async create(userNo: number, createReservationDto: CreateReservationDto, chargeId: string) {
+  async create(userNo: number = null, createReservationDto: CreateReservationDto) {
+    if (!userNo && (!createReservationDto.name || !createReservationDto.phone_number)) {
+      // not have member (userNo) or nonmember (name, phone_number) info
+      return { statusCode: HttpStatus.BAD_REQUEST, msg: 'Not Have Customer Info' };
+    }
     // create in reservation
     const reservation = await this.rRepository.save(createReservationDto);
-    // create log in reservation log
-    await ReservationLog.createAndSave('create', '', '', chargeId, reservation);
+    if (userNo) {
+      // member only
+      // connect reservation to user
+      const user = await User.findByNo(userNo);
+      reservation.user = user;
+      reservation.name = user.name;
+      reservation.phone_number = user.phone_number;
+    }
+    // change format from string to date
+    reservation.reserved_at = new Date(reservation.reserved_at);
+    await this.rRepository.save(reservation);
+    return { statusCode: HttpStatus.CREATED, reservation: reservation };
+  }
+
+  // create new reservation by user no
+  async createByUserNo(
+    userNo: number,
+    createReservationDto: CreateReservationDto,
+    chargeId: string,
+  ) {
+    // create in reservation
+    const reservation = await this.rRepository.save(createReservationDto);
     // connect reservation to user
     reservation.user = await User.findByNo(userNo);
     // change format from string to date
     reservation.reserved_at = new Date(reservation.reserved_at);
     await this.rRepository.save(reservation);
+    // create log in reservation log
+    await ReservationLog.createAndSave('create', '', '', chargeId, reservation);
     return { statusCode: HttpStatus.CREATED, reservation: reservation };
   }
 
@@ -67,7 +93,9 @@ export class ReservationService {
     // get reservation remained_price
     this.getRemainedPrice(reservation);
     // delete user password
-    delete reservation.user.password;
+    if (reservation.user && reservation.user.password) {
+      delete reservation.user.password;
+    }
     return { statusCode: HttpStatus.OK, reservation: reservation };
   }
 

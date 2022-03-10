@@ -78,7 +78,9 @@ export class User extends BaseEntity {
       .leftJoin('user.reservations', 'reservation')
       .where('reservation.no = :no', { no: reservation_no })
       .getOne();
-    delete user.password;
+    if (user) {
+      delete user.password;
+    }
     return user;
   }
 }
