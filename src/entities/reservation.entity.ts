@@ -37,14 +37,20 @@ export class Reservation extends BaseEntity {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column('varchar', { length: 100, default: null, comment: '예약자' })
+  name: string;
+
+  @Column('varchar', { length: 20, default: null, comment: '예약자 전화번호' })
+  phone_number: string;
+
   @ManyToOne(() => User, (user) => user.reservations)
-  user: User;
+  user: User; // 해당 회원
 
   @OneToMany(() => Payment, (payment) => payment.reservation)
-  payments: Payment[];
+  payments: Payment[]; // 결제 내역
 
   @OneToMany(() => ReservationLog, (log) => log.target)
-  logs: ReservationLog[];
+  logs: ReservationLog[]; // 로그
 
   static async findByNo(no: number) {
     return this.findOne({ where: { no: no }, relations: ['payments'] });
