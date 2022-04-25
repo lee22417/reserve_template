@@ -8,11 +8,11 @@ export class CreatePaymentDto {
   price: number;
 
   @IsNotEmpty()
-  @ApiProperty({ description: '결제 유형', example: 'CART / BANK' })
+  @ApiProperty({ description: '결제 유형', example: 'CARD / BANK' })
   method: PaymentMethod;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @ApiProperty({ description: '결제 카드사/은행명', example: 'bc' })
   bank: string;
 

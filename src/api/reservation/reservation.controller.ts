@@ -32,15 +32,15 @@ export class ReservationController {
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: '회원번호로 예약생성 API',
-    description: '해당 no의 예약생성, 관리자만 모든 예약 정보 생성 가능',
+    description: '관리자가 해당 회원의 예약내역 생성',
   })
   async createByUserNo(
     @Param('user_no') userNo: number,
     @Body() createReservationDto: CreateReservationDto,
     @Req() req,
   ) {
-    const isAllowed = this.commonAuth.isAdmin(req.app.locals.payload);
-    if (isAllowed) {
+    const isAdmin = this.commonAuth.isAdmin(req.app.locals.payload);
+    if (isAdmin) {
       return await this.reservationService.createByUserNo(
         userNo,
         createReservationDto,

@@ -78,7 +78,7 @@ export class UserService {
   async findOne(no: number) {
     const user = await this.userRepository.findOne({
       where: { no: no, is_quit: false },
-      select: ['id', 'name', 'email', 'phone_number'],
+      select: ['id', 'name', 'email', 'phone_number', 'is_admin'],
     });
     return { statusCode: HttpStatus.OK, user: user };
   }

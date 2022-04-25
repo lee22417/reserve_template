@@ -16,11 +16,11 @@ export class CreateReservationDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '예약자', example: 'test' })
+  @ApiProperty({ description: '비회원일때 예약자', example: 'test' })
   name: string;
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '예약자 전화번호', example: '010-1234-1234' })
+  @ApiProperty({ description: '비회원일때 예약자 전화번호', example: '010-1234-1234' })
   phone_number: string;
 }
