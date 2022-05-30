@@ -1,6 +1,6 @@
 ## reserve_template
 
-- Reservation App REST API
+- Escape Room Reservation System REST API
 
 ## Env
 
