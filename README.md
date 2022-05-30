@@ -5,7 +5,7 @@
 ## Env
 
 - NestJs, Docker, MySQL, Typescript, Git
-- TypeORM, JWT, esLint, Prettier
+- TypeORM, JWT, esLint, Prettier, Swagger
 - MacOS (M1), VS code, Postman, SourceTree, Github
 
 ## Installation
